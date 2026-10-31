@@ -35,9 +35,8 @@ test("mobile destinations and nested lesson states remain functional", () => {
   assert.match(shell, /aria-label=\{tr\(ar, en\)\}/);
 });
 
-test("preserve existing login and dashboard visual implementations", () => {
+test("preserve dashboard source and nonauth original CSS", () => {
   const refs = {
-    "src/components/AuthForm.tsx": "03301707",
     "src/components/platform/StudentHome.tsx": "80d9cd54",
     "src/app/platform.css": "3e035170",
     "src/app/globals.css": "5d7d6f9e",
@@ -59,4 +58,25 @@ test("approved CSS continues to support dark theme, focus and reduced motion", (
   assert.match(css, /:focus-visible/);
   assert.match(css, /prefers-reduced-motion/);
   assert.match(css, /@media \(max-width: 700px\)/);
+});
+
+test("authentication uses original reference flows and real server actions",()=>{
+ const auth=read("src/components/AuthForm.tsx");
+ const css=read("src/app/auth-reference.css");
+ const shell=read("src/components/platform/Shell.tsx");
+ const actions=read("src/app/login/actions.ts");
+ assert.match(auth,/ApprovedAuthSymbols/);
+ assert.match(auth,/className="shell"/);
+ assert.match(auth,/className="pane"/);
+ assert.match(auth,/className="card"/);
+ assert.match(auth,/className="seg"/);
+ assert.match(auth,/ReferenceSelect name="stage"/);
+ assert.match(auth,/ReferenceSelect name="uni"/);
+ assert.match(auth,/ReferenceSelect name="gov"/);
+ assert.match(auth,/action=\{formAction\}/);
+ assert.match(actions,/signInWithPassword/);
+ assert.match(actions,/auth\.signUp/);
+ assert.match(shell,/if \(path === "\/login" \|\| path === "\/signup"\) return children;/);
+ assert.match(css,/\.fk-auth/);
+ assert.doesNotMatch(css,/(^|\n)body\s*\{/);
 });
