@@ -81,3 +81,7 @@ h2.section { font-size: 1.3rem; margin: 40px 0 12px; }
 .auth .alt a { color: var(--cobalt); font-weight: 600; }
 .error { color: var(--danger); margin-top: 12px; }
 .back { display: inline-block; margin: 24px 0 0; color: var(--cobalt); font-weight: 600; }
+
+/* Isolated full-width owner console; no changes to student pages. */
+body:has([data-farmakon-owner]) > header.topbar { display: none; }
+body:has([data-farmakon-owner]) > main.wrap { max-width:none; width:100%; padding:0; }
