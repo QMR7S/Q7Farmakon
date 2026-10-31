@@ -31,7 +31,8 @@ export default function Shell({
   const auth =
     path === "/login" || path === "/signup" || path === "/owner/login";
   const owner = path === "/owner" || path === "/owner-review";
-  const active = destinations.find((d) => d[0] === path);
+  const selectedPath = path.startsWith("/lessons/") ? "/learn" : path.startsWith("/courses/") ? "/my-courses" : path;
+  const active = destinations.find((d) => d[0] === selectedPath);
   const label = active
     ? active[locale === "ar" ? 1 : 2]
     : tr("Farmakon", "Farmakon");
@@ -40,8 +41,9 @@ export default function Shell({
       <Link
         key={href}
         href={href}
-        className={"q-nav " + (path === href ? "selected" : "")}
-        aria-current={path === href ? "page" : undefined}
+        className={"q-nav " + (selectedPath === href ? "selected" : "")}
+        aria-current={selectedPath === href ? "page" : undefined}
+        aria-label={tr(ar, en)}
         title={tr(ar, en)}
       >
         <Icon name={icon} />
@@ -56,10 +58,8 @@ export default function Shell({
       {!auth && !owner && (
         <aside className="q-sidebar">
           <Link className="q-brand" href="/">
-            <span className="q-mark">
-              F<span>•</span>
-            </span>
-            <span>
+            <span className="q-mark" aria-hidden="true"><Icon name="pharmacy" size={25} /></span>
+            <span className="q-brand-label">
               Farmakon<small>LEARN. CONNECT. GROW.</small>
             </span>
           </Link>
@@ -72,7 +72,9 @@ export default function Shell({
           <p className="q-nav-label">
             {tr("تعلّم بعمق", "EXPLORE & PRACTICE")}
           </p>
-          <nav>{nav(destinations.slice(5, 10))}</nav>
+          <nav aria-label={tr("التدريب والتطبيق", "Practice and apply")}>{nav(destinations.slice(5, 9))}</nav>
+          <p className="q-nav-label">{tr("أدواتي الدراسية", "MY STUDY TOOLS")}</p>
+          <nav aria-label={tr("أدوات الطالب", "Student tools")}>{nav(destinations.slice(9, 14))}</nav>
           <div className="q-side-end">
             <Link className="q-nav" href="/settings">
               <Icon name="settings" />
@@ -85,7 +87,9 @@ export default function Shell({
             <button
               className="q-nav"
               onClick={() => setCollapsed(!collapsed)}
-              aria-label={tr("طي القائمة", "Collapse sidebar")}
+              type="button"
+              aria-pressed={collapsed}
+              aria-label={collapsed ? tr("توسيع القائمة", "Expand sidebar") : tr("طي القائمة", "Collapse sidebar")}
             >
               <Icon name="collapse" />
               <span>{tr("طي القائمة", "Collapse sidebar")}</span>
@@ -106,9 +110,7 @@ export default function Shell({
         <header className="q-header">
           {auth || owner ? (
             <Link className="q-brand" href="/">
-              <span className="q-mark">
-                F<span>•</span>
-              </span>
+              <span className="q-mark" aria-hidden="true"><Icon name="pharmacy" size={25} /></span>
               <span>Farmakon</span>
             </Link>
           ) : (
