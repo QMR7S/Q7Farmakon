@@ -5,7 +5,7 @@ import { Preferences } from "@/components/platform/Preferences";
 import Shell from "@/components/platform/Shell";
 import "./globals.css";
 import "./platform.css";
-import "./internal-identity.css";
+import "./internal-identity.css";\nimport "./auth-reference.css";
 export const metadata: Metadata = {
   title: {
     default: "Farmakon — مساحتك لتعلّم الصيدلة",
