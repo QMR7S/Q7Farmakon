@@ -34,11 +34,11 @@ test("Approved brand asset is a genuine WebP and retains its identity",()=>{
  assert.equal(a.subarray(8,12).toString("ascii"),"WEBP");
 });
 
-test("No login/sign-up visual CSS overlays have been introduced",()=>{
+test("Authentication gets own reference design; interior CSS never targets it",()=>{
  const form=read("src/components/AuthForm.tsx");
- assert.match(form,/className="q-auth-card"/);
- assert.match(form,/className="q-auth-story"/);
- assert.match(form,/className="q-auth-form"/);
+ assert.match(form,/className="fk-auth"/);
+ assert.match(form,/ApprovedAuthSymbols/);
+ assert.match(form,/ReferenceSelect/);
  assert.match(css,/\.q-app:not\(\.auth-layout\) \.q-sidebar/);
  assert.match(css,/\.q-app:not\(\.auth-layout\) \.q-continue/);
  assert.match(css,/\.q-app:not\(\.auth-layout\) \.q-panel/);
