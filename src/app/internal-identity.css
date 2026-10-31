@@ -47,7 +47,16 @@ html[data-theme="dark"] .q-app:not(.auth-layout){
   box-shadow:0 0 19px rgba(45,157,243,.26),0 0 15px rgba(250,105,86,.12);
   border-radius:13px;
 }
-.q-app:not(.auth-layout) .q-mark span{color:#FD8D4B}
+.q-app:not(.auth-layout) .q-mark{
+  background:#060A22 url("/brand/farmakon-icon.webp") center/92% no-repeat;
+  font-size:0;
+}
+.q-app:not(.auth-layout) .q-mark span{display:none}
+.q-app:not(.auth-layout) .q-orbit-core{
+  background:#060A22 url("/brand/farmakon-icon.webp") center/75% no-repeat;
+  font-size:0;border-radius:28px;
+}
+.q-app:not(.auth-layout) .q-orbit-core span{display:none}
 .q-app:not(.auth-layout) .q-nav-label{color:#8293C0;letter-spacing:.65px}
 .q-app:not(.auth-layout) .q-sidebar .q-nav{
   min-height:47px;border-radius:12px;color:#9AA5CC;
