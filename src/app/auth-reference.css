@@ -11,3 +11,30 @@
 @keyframes pop{from{opacity:0;transform:translateY(-6px) scale(.98)}}.fk-auth .dds{display:flex;align-items:center;gap:8px;padding:6px 14px;border-bottom:1px solid var(--border);color:var(--muted)}.fk-auth .dds input{flex:1;border:0;background:none;outline:0;height:42px;min-width:0}.fk-auth .ddp ul{list-style:none;margin:0;padding:6px;max-height:340px;overflow:auto;outline:0}.fk-auth .ddp li{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:11px;cursor:pointer;min-height:46px}.fk-auth .ddp li span{flex:1}.fk-auth .ddp li.act{background:color-mix(in srgb,var(--acc) 13%,transparent)}.fk-auth .ddp li[aria-selected=true]{color:var(--acc);font-weight:700}.fk-auth .ddp li.none{color:var(--muted);cursor:default;justify-content:center}.fk-auth .nb{width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:var(--field);border:1px solid var(--border);font-size:14px;font-weight:700;flex:none;padding:6px}.fk-auth .steps{display:flex;align-items:center;gap:10px;margin-bottom:18px;font-size:13px;color:var(--muted)}.fk-auth .steps i{flex:1;height:4px;border-radius:4px;background:var(--border);transition:.4s}.fk-auth .steps i.on{background:linear-gradient(90deg,#FD8D4B,#2D9DF3)}.fk-auth .step{animation:rise .35s cubic-bezier(.2,.8,.2,1)}.fk-auth .reqs{display:flex;flex-wrap:wrap;gap:6px 14px;margin:-2px 2px 12px;padding:0;list-style:none;font-size:12.5px;color:var(--muted)}.fk-auth .reqs li{display:flex;align-items:center;gap:6px}.fk-auth .reqs li .i{width:15px;height:15px;opacity:.5}.fk-auth .reqs li.ok{color:var(--ok)}.fk-auth .reqs li.ok .i{opacity:1}.fk-auth .sl{margin-inline-start:auto;font-weight:700}.fk-auth .btns{display:flex;gap:10px}.fk-auth .btns .btn{flex:1}.fk-auth .btns .ghost{flex:0 0 auto;width:auto;padding:0 20px;background:var(--field);color:var(--text);border:1.5px solid var(--border);box-shadow:none}.fk-auth .btns .ghost:hover{border-color:var(--acc);box-shadow:none}.fk-auth[dir="rtl"] .ghost .i.back{transform:scaleX(-1)}.fk-auth .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}.fk-auth .meta span{display:flex;align-items:center;gap:6px;font-size:13px;padding:5px 11px;border-radius:999px;background:var(--surface);border:1px solid var(--border);color:var(--muted)}.fk-auth .meta .i{width:15px;height:15px;color:var(--acc)}.fk-auth .sug{grid-column:span 12;display:flex;gap:16px;align-items:center;border:1px dashed color-mix(in srgb,var(--acc) 55%,transparent);background:color-mix(in srgb,var(--acc) 7%,var(--surface))}.fk-auth .sug p{margin:2px 0 0;color:var(--muted);font-size:14.5px}.fk-auth .sug .btn{width:auto;padding:0 20px;height:44px;font-size:15px;flex:none}.fk-auth .empty{display:grid;place-items:center;text-align:center;gap:6px;padding:56px 20px;border:1px dashed var(--border);border-radius:22px;color:var(--muted)}.fk-auth .empty .bd{width:56px;height:56px;border-radius:18px;margin-bottom:6px}.fk-auth .empty h3{margin:0;color:var(--text)}.fk-auth .side a.on{box-shadow:inset 3px 0 0 #3FBAFD}.fk-auth[dir="rtl"] .side a.on{box-shadow:inset -3px 0 0 #3FBAFD}
 @media (max-width:900px){.fk-auth .ddp{position:fixed;inset-inline:0;bottom:0;top:auto;border-radius:24px 24px 0 0;box-shadow:0 0 0 100vmax rgba(2,4,18,.55);padding-bottom:env(safe-area-inset-bottom,0px);animation:sheet .25s ease-out}.fk-auth .ddp::before{content:"";display:block;width:42px;height:4px;border-radius:4px;background:var(--border);margin:10px auto 2px}.fk-auth .ddp ul{max-height:46vh}.fk-auth .sug{flex-direction:column;align-items:stretch}}
 @keyframes sheet{from{transform:translateY(40px);opacity:0}}
+
+/* Functional link tabs mirror the exact approved HTML's button tabs. */
+.fk-auth .seg a{
+ position:relative;z-index:1;display:grid;place-items:center;
+ border:0;background:none;height:42px;border-radius:10px;cursor:pointer;
+ font-weight:700;color:var(--muted);transition:color .25s;
+ text-decoration:none;font-size:inherit;
+}
+.fk-auth .seg a[aria-selected="true"]{color:#04061D}
+.fk-auth .seg .pill{pointer-events:none}
+.fk-auth .f:focus-within>.i{color:var(--acc)}
+.fk-auth .f input[type=password],.fk-auth .f input[type=text],.fk-auth .f input[type=email]{
+ font-size:15px;
+}
+.fk-auth .f input:not(:placeholder-shown)+label{top:7px;font-size:12px}
+.fk-auth .ddp li{user-select:none}
+.fk-auth .ddp .dds[hidden]{display:none}
+.fk-auth .step[hidden],.fk-auth [hidden]{display:none!important}
+.fk-auth .card .note{line-height:1.7}
+.fk-auth .mark img{object-fit:contain}
+.fk-auth .pane{width:100%}
+.fk-auth button,.fk-auth a{touch-action:manipulation}
+@media(max-width:900px){
+ .fk-auth .cardhead .tile-logo{flex:none}
+ .fk-auth .ddp{z-index:101}
+ .fk-auth .ddb{min-height:58px}
+}
