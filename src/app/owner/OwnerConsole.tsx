@@ -18,7 +18,7 @@ export default function OwnerConsole({courses,summary,university,stages,byCourse
  const [codeState,codeAction,codePending]=useActionState(issueActivationCode,defaultState);
  const [theme,setTheme]=useState<"light"|"dark">("light");
  const [period,setPeriod]=useState("annual");
- return <div className={styles.shell} data-theme={theme} dir="rtl">
+ return <div className={styles.shell} data-theme={theme} data-farmakon-owner dir="rtl">
   <aside className={styles.side}>
    <div className={styles.logo}><span className={styles.mark}>F<span>•</span></span><div><strong>Farmakon</strong><small>Q7 / Owner Studio</small></div></div>
    <p className={styles.menuTitle}>إدارة المنصة</p>
@@ -30,7 +30,7 @@ export default function OwnerConsole({courses,summary,university,stages,byCourse
     <div><span className={styles.eyebrow}>Farmakon · إدارة المحتوى والاشتراكات</span><h1>{menu.find(x=>x[0]===section)?.[1]}</h1></div>
     <div className={styles.topRight}><span className={styles.status}>{writesEnabled?"وضع Staging":"الكتابة معلقة للحماية"}</span><button className={styles.outline} onClick={()=>setTheme(theme==="light"?"dark":"light")}>{theme==="light"?"☾ داكن":"☼ فاتح"}</button></div>
    </header>
-   <main className={styles.content}>
+   <div className={styles.content}>
     {!summary.coverage&&<div className={styles.warning} role="status">بعض الجداول أو صلاحيات القراءة لم تجهز بعد. لا تُعرض أرقام تخمينية؛ علامة «—» تعني بيانات غير متوفرة.</div>}
     {section==="overview"&&<>
      <section className={styles.hero}><div><span>COMMAND CENTER</span><h2>لوحة المالك — تحكم شامل ومنظّم</h2><p>الكورسات، المعاينات المجانية، أكواد التفعيل، الاشتراكات ومتابعة الطلبة. البيانات الحقيقية تظهر عند تهيئة Staging.</p></div><button onClick={()=>setSection("courses")}>+ إنشاء كورس جديد</button></section>
