@@ -4,7 +4,7 @@
 **V3 branch:** `feature/q7-v3-foundation-2026-11-01`, based on V2.4 work development `e6f48654699e5e90737618e9a83e5ed148d6a941`.
 **Date:** 2026-11-01
 
-## 0. Non-negotiable execution rules
+> **تصحيح إلزامي للهوية — 2026-11-01:** المستخدم يشترط عدم تغيير تصميم وألوان واجهة تسجيل الدخول ولوحة الطالب المعتمدتين. يُلغى أي اقتراح سابق بإعادة تصميم شكلي أو تغيير شعار أو ألوان أو فرض CSS جديدة. يرجع التفصيل إلى `docs/Q7-V3-VISUAL-FIDELITY-CONTRACT-AR.md`. التحديثات تكون وظيفية وتقنية وتحسينات تجربة لا تغير الهوية إلا بموافقة صريحة على مرجع بصري قابل للفحص.\n\n## 0. Non-negotiable execution rules
 1. Continue the existing repository, never create a parallel substitute or erase successful tests/security patches. Record precise base/head SHA and changes.
 2. Do not alter `main`, merge, trigger a Production deployment, write any Production database, change Google Drive permissions, or buy/enable paid plans without specific authorization.
 3. Production, staging, demo, local and protected media must be distinguished everywhere. A working frontend without backend is **not** a completed feature.
@@ -15,7 +15,7 @@
 ## 1. Product and design brief
 Farmakon is a bilingual (Arabic and English) professional pharmacy education experience. Students access purchased courses, videos, instructor handouts, licensed references, topic-aligned question banks and clinical cases; the owner controls publishing, access codes, instructors, entitlements, content and analytics. Tablet/phone/desktop are all first-class. User journey: sign in -> find course -> resume lecture -> consult PDF/notes -> take topic-linked practice -> see measured progress; owner journey: verified Google sign in and explicit DB grant -> create draft course -> upload and publish lesson -> issue activation code -> audit and measure activity.
 
-Use the existing login identity as a starting constraint (cobalt `#2447B5`, white, soft mint and ink) but produce a coherent visual system rather than a generic template. Consistency, clear hierarchy, native-feeling controls, real icon grammar, generous whitespace, calibrated motion and accessibility beat decorative glass. No emoji-only navigation, misaligned controls, fake cover art or deceptive badges. Default Arabic RTL, genuine English LTR, consistent light/dark.
+Preserve the existing approved login and dashboard visuals unchanged. Do not infer exact design from cobalt/white/mint code colors or a text-only markdown export; those are not the supplied original screenshot. Any visual alteration must be authorized from an actual comparable source image. Consistency, clear hierarchy, native-feeling controls, real icon grammar, generous whitespace, calibrated motion and accessibility beat decorative glass. No emoji-only navigation, misaligned controls, fake cover art or deceptive badges. Default Arabic RTL, genuine English LTR, consistent light/dark.
 
 ### Design system acceptance
 - Foundation tokens: semantic backgrounds, surfaces, text, muted text, stroke, accent, focus, elevation, spacing 4/8/12/16/24/32/48, 44+ px interactive targets, radii 12/16/20/24.
@@ -28,7 +28,7 @@ Use the existing login identity as a starting constraint (cobalt `#2447B5`, whit
 Verify actual Q7 Supabase project reference and owner; protect backups, migrations, Storage and Auth settings. The other connected `Farmakon-Staging` is not automatically Q7. No guessed cross-project writes. Establish staging credentials; exact project-ref guard; isolated tests for Auth, RLS, sessions, subscription access and ownership. Document and review any migration before applying to the confirmed isolated database.
 
 ### P1 — V3 interface foundation (STARTED)
-Unify the shell, brand glyph, design tokens, icon stroke geometry, mobile navigation, keyboard access, language/theme controls and clear service status. Preserve known V2.4 security logic. Review Home, Auth, My Courses, Lecture Center and Owner separately on all breakpoint families. Require actual screenshots and no broken links before preview acceptance.
+Preserve approved login and dashboard source identity exactly; improve only accessible labels, keyboard usability, mobile route behavior, language/theme functionality and truthful service status without an unapproved visual overhaul. Preserve known V2.4 security logic. Review Home, Auth, My Courses, Lecture Center and Owner separately on all breakpoint families. Require actual screenshots and no broken links before preview acceptance.
 
 ### P2 — Courses + Lecture Center
 Course/unit/lesson navigation, published state, guarded entitlement checking server-side, signed media streaming, course chapters, verified resources, PDF reader with page linking, private note autosave, revision conflict recovery, resume video second and PDF page across devices, safe media error states. Player requirements: play/pause, seek 5/10/15, speed, captions, available quality selection, keyboard and focus, picture-in-picture/fullscreen where supported and volume. Verify real protected lecture media and cross-device persistence, not only local test fixtures.
