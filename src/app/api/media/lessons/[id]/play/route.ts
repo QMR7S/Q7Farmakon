@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { createClient as createUserClient } from "@/lib/supabase/server";
+import { freePreviewLessonIds, isEnrollmentActive } from "@/lib/courses/access-policy";
 
 export const dynamic = "force-dynamic";
 
@@ -20,30 +21,29 @@ export async function GET(_request: NextRequest, context:{params:Promise<{id:str
  const {data:course}=await supabase.from("courses")
   .select("id,status,free_preview_limit").eq("id",lesson.course_id).eq("status","published").maybeSingle();
  if(!course)return NextResponse.json({error:"Course unavailable"},{status:404,headers:noStore});
- const limit=Math.max(0,Math.min(1000,Number(course.free_preview_limit||0)));
+ const limit=Number(course.free_preview_limit ?? 0);
+ if(!Number.isSafeInteger(limit)||limit<0||limit>1000)
+  return NextResponse.json({error:"Invalid preview policy"},{status:503,headers:noStore});
  let free=false;
  if(limit>0){
   const [{data:allLessons,error:lError},{data:units,error:uError}]=await Promise.all([
-   supabase.from("lessons").select("id,unit_id,position").eq("course_id",lesson.course_id).eq("status","published"),
-   supabase.from("units").select("id,position").eq("course_id",lesson.course_id),
+   supabase.from("lessons").select("id,unit_id,position,status").eq("course_id",lesson.course_id).eq("status","published").range(0,999),
+   supabase.from("units").select("id,position").eq("course_id",lesson.course_id).range(0,999),
   ]);
-  if(lError||uError)return NextResponse.json({error:"Preview configuration unavailable"},{status:503,headers:noStore});
-  const up=new Map((units||[]).map(x=>[x.id,Number(x.position??0)]));
-  const ordered=[...(allLessons||[])].sort((a,b)=>
-    (up.get(a.unit_id)??0)-(up.get(b.unit_id)??0) ||
-    Number(a.position??0)-Number(b.position??0) || a.id.localeCompare(b.id));
-  free=ordered.slice(0,limit).some(x=>x.id===id);
+  // Fail closed if the default query window may truncate course data.
+  // Full pagination will be implemented after verifying the real Q7 schema.
+  if(lError||uError||!allLessons||!units||allLessons.length===1000||units.length===1000)
+   return NextResponse.json({error:"Preview policy requires verified course indexing"},{status:503,headers:noStore});
+  free=freePreviewLessonIds(allLessons,units,limit).has(id);
  }
  let entitled=false;
  if(!free){
   const {data:{user}}=await supabase.auth.getUser();
   if(!user)return NextResponse.json({error:"Subscription required"},{status:403,headers:noStore});
-  const now=new Date().toISOString();
-  const {data:active,error}=await supabase.from("enrollments").select("id").eq("user_id",user.id)
-   .eq("course_id",lesson.course_id).eq("status","active")
-   .or(`expires_at.is.null,expires_at.gt.${now}`).limit(1);
+  const {data:active,error}=await supabase.from("enrollments").select("user_id,course_id,status,expires_at").eq("user_id",user.id)
+   .eq("course_id",lesson.course_id).eq("status","active").limit(50);
   if(error)return NextResponse.json({error:"Entitlement service unavailable"},{status:503,headers:noStore});
-  entitled=!!active?.length;
+  entitled=(active??[]).some(e=>isEnrollmentActive(e,lesson.course_id,user.id));
   if(!entitled)return NextResponse.json({error:"Subscription expired or missing"},{status:403,headers:noStore});
  }
  const url=process.env.NEXT_PUBLIC_SUPABASE_URL;
