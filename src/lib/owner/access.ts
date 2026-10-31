@@ -1,3 +1,4 @@
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 
@@ -7,27 +8,42 @@ import { createClient } from "@/lib/supabase/server";
  * No roles from editable user_metadata, no browser-side owner decisions.
  */
 export async function getOwnerAccess() {
+  if (!isSupabaseConfigured())
+    return { state: "signed-out" as const, supabase: null };
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
   if (error || !user) return { state: "signed-out" as const, supabase };
   const verifiedGoogle = user.identities?.some(
-    (identity) => identity.provider === "google" &&
-      identity.identity_data?.email?.toLowerCase() === "appsmr32@gmail.com"
+    (identity) =>
+      identity.provider === "google" &&
+      identity.identity_data?.email?.toLowerCase() === "appsmr32@gmail.com",
   );
-  if (user.email?.toLowerCase() !== "appsmr32@gmail.com" ||
-      !user.email_confirmed_at || !verifiedGoogle) {
+  if (
+    user.email?.toLowerCase() !== "appsmr32@gmail.com" ||
+    !user.email_confirmed_at ||
+    !verifiedGoogle
+  ) {
     return { state: "forbidden" as const, supabase };
   }
   const { data, error: grantError } = await supabase
-    .from("q7_owner_grants").select("user_id").eq("user_id", user.id).maybeSingle();
-  if (grantError || !data) return { state: "not-provisioned" as const, supabase };
+    .from("q7_owner_grants")
+    .select("user_id")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (grantError || !data)
+    return { state: "not-provisioned" as const, supabase };
   return { state: "authorized" as const, supabase, user };
 }
 
 export async function requireOwnerAccess() {
   const result = await getOwnerAccess();
   if (result.state !== "authorized") {
-    throw new Error("لا توجد صلاحية لتنفيذ العملية. تحقق من تسجيل Google ومنح المالك الموثق.");
+    throw new Error(
+      "لا توجد صلاحية لتنفيذ العملية. تحقق من تسجيل Google ومنح المالك الموثق.",
+    );
   }
   return result;
 }

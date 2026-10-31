@@ -1,8 +1,17 @@
 "use server";
+import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
-export async function login(_prev: { error?: string } | undefined, formData: FormData) {
+export async function login(
+  _prev: { error?: string } | undefined,
+  formData: FormData,
+) {
+  if (!isSupabaseConfigured())
+    return {
+      error:
+        "تسجيل الحساب غير متاح حتى إعداد بيئة المصادقة. / Authentication is not configured.",
+    };
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: String(formData.get("email") ?? ""),
@@ -12,15 +21,27 @@ export async function login(_prev: { error?: string } | undefined, formData: For
   redirect("/");
 }
 
-export async function signup(_prev: { error?: string } | undefined, formData: FormData) {
+export async function signup(
+  _prev: { error?: string } | undefined,
+  formData: FormData,
+) {
   const password = String(formData.get("password") ?? "");
-  if (password.length < 8) return { error: "كلمة المرور يجب ألا تقل عن 8 أحرف." };
+  if (password.length < 8)
+    return { error: "كلمة المرور يجب ألا تقل عن 8 أحرف." };
+  if (!isSupabaseConfigured())
+    return {
+      error:
+        "تسجيل الحساب غير متاح حتى إعداد بيئة المصادقة. / Authentication is not configured.",
+    };
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: String(formData.get("email") ?? ""),
     password,
     options: { data: { full_name: String(formData.get("full_name") ?? "") } },
   });
-  if (error) return { error: "تعذّر إنشاء الحساب. تأكد من البريد الإلكتروني وحاول مجددًا." };
+  if (error)
+    return {
+      error: "تعذّر إنشاء الحساب. تأكد من البريد الإلكتروني وحاول مجددًا.",
+    };
   redirect("/");
 }
