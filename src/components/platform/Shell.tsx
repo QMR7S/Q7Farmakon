@@ -74,7 +74,13 @@ export default function Shell({
           <p className="q-nav-label">
             {tr("تعلّم بعمق", "EXPLORE & PRACTICE")}
           </p>
-          <nav>{nav(destinations.slice(5, 10))}</nav>
+          <nav aria-label={tr("التدريب والتطبيق", "Practice and application")}>
+            {nav(destinations.slice(5, 9))}
+          </nav>
+          <p className="q-nav-label">{tr("أدواتي الدراسية", "MY STUDY TOOLS")}</p>
+          <nav aria-label={tr("الأدوات الدراسية", "Study tools")}>
+            {nav(destinations.slice(9, 14))}
+          </nav>
           <div className="q-side-end">
             <Link className="q-nav" href="/settings">
               <Icon name="settings" />
@@ -89,7 +95,7 @@ export default function Shell({
               type="button"
               aria-pressed={collapsed}
               onClick={() => setCollapsed(!collapsed)}
-              aria-label={tr("طي القائمة", "Collapse sidebar")}
+              aria-label={collapsed ? tr("توسيع القائمة", "Expand sidebar") : tr("طي القائمة", "Collapse sidebar")}
             >
               <Icon name="collapse" />
               <span>{tr("طي القائمة", "Collapse sidebar")}</span>
