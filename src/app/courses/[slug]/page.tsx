@@ -52,7 +52,7 @@ export default async function CoursePage({ params }: { params: Promise<{ slug: s
           <ul className="lessons">
             {(lessons ?? []).filter((l) => l.unit_id === u.id).map((l) => (
               <li key={l.id}>
-                <span>{l.title}</span>
+                <Link href={`/lessons/${l.id}`}>{l.title}</Link>
                 {previews.has(l.id) || enrolled
                   ? <span className="tag">متاح</span>
                   : <span className="tag lock">مقفل</span>}
