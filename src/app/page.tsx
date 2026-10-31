@@ -1,9 +1,11 @@
 import Link from "next/link";
+import HomeIntro from "@/components/q7/HomeIntro";
 import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return <HomeIntro unconfigured/>;
   const supabase = await createClient();
 
   const [{ data: subjects }, { data: courses }] = await Promise.all([
@@ -38,7 +40,7 @@ export default async function Home() {
           ))}
         </ul>
       ) : (
-        <div className="empty">لا توجد مقررات منشورة بعد. أضف مقررًا من لوحة Supabase وغيّر حالته إلى «published».</div>
+        <div className="empty">لا توجد مقررات منشورة بعد. تظهر الكورسات هنا بعد إتاحتها من المدرّس.</div>
       )}
 
       {byYear.size > 0 && (

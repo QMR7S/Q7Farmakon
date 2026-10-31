@@ -1,0 +1,4 @@
+"use client";
+import Link from "next/link";
+import {usePreferences} from "./AppShell";
+export default function HomeIntro({unconfigured=false}:{unconfigured?:boolean}){const {tr}=usePreferences();return <section className="hero"><p className="eyebrow">FARMAKON Q7</p><h1>{tr("مساحتك لتعلّم الصيدلة","Your pharmacy learning space")}</h1><p>{tr("الكورسات والمحاضرات والمراجع في مكان واحد.","Courses, lectures and references in one place.")}</p>{unconfigured&&<div className="empty" role="status">{tr("بيانات الكورسات غير متاحة: لم تُربط بيئة الاختبار بعد. لا توجد بيانات طالب تجريبية في هذه المعاينة.","Course data is unavailable: the test environment is not connected yet. This preview contains no sample student records.")}</div>}<Link href="/courses" className="btn">{tr("استكشف الكورسات","Explore courses")}</Link></section>}

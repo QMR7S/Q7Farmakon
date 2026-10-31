@@ -1,107 +1,49 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import {useEffect,useRef,useState,useId} from "react";
+import {usePreferences} from "./AppShell";
 import styles from "./SmartPlayer.module.css";
-
 export type QualitySource={label:string;src:string;mime?:string};
-export type SubtitleSource={lang:"ar"|"en"|string;label:string;src:string};
-export default function SmartPlayer({
- title, sources, subtitles=[], poster, previewSrc,
-}:{
- title:string;sources:QualitySource[];subtitles?:SubtitleSource[];poster?:string;previewSrc?:string;
-}){
- const video=useRef<HTMLVideoElement>(null);
- const hoverVideo=useRef<HTMLVideoElement>(null);
- const box=useRef<HTMLDivElement>(null);
- const [quality,setQuality]=useState(sources[0]?.label??"Auto");
- const [speed,setSpeed]=useState(1);
- const [playing,setPlaying]=useState(false);
- const [time,setTime]=useState(0);
- const [duration,setDuration]=useState(0);
- const [menu,setMenu]=useState(false);
- const [captions,setCaptions]=useState("off");
- const [muted,setMuted]=useState(false);
- const [hover,setHover]=useState<{x:number;t:number}|null>(null);
- const [error,setError]=useState("");
- const current=sources.find(x=>x.label===quality)??sources[0];
- const format=(seconds:number)=>`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(Math.floor(seconds%60)).padStart(2,"0")}`;
- useEffect(()=>{const v=video.current;if(v)v.playbackRate=speed;},[speed]);
- useEffect(()=>{const v=video.current;if(!v)return;
-  const tracks=Array.from(v.textTracks);
-  tracks.forEach(track=>{track.mode=captions!=="off"&&track.language===captions?"showing":"disabled";});
- },[captions,quality,subtitles]);
- useEffect(()=>{const onEscape=(e:KeyboardEvent)=>{if(e.key==="Escape")setMenu(false);};
-  document.addEventListener("keydown",onEscape);return()=>document.removeEventListener("keydown",onEscape)},[]);
- async function toggle(){
-  const v=video.current;if(!v||!current)return;
-  try{if(v.paused)await v.play();else v.pause();setError("");}
-  catch{setError("تعذر تشغيل الملف. تحقق من عنوان الفيديو وصلاحية الوصول.");}
- }
- function skip(seconds:number){const v=video.current;if(v&&Number.isFinite(v.duration))v.currentTime=Math.max(0,Math.min(v.duration,v.currentTime+seconds));}
- function changeQuality(label:string){
-  const v=video.current;if(!v||label===quality)return;
-  const next=sources.find(s=>s.label===label);
-  if(!next)return;
-  const oldTime=v.currentTime,wasPlaying=!v.paused;
-  setQuality(label);setMenu(false);
-  v.pause();v.src=next.src;v.load();
-  v.addEventListener("loadedmetadata",()=>{
-    v.currentTime=Math.min(oldTime,v.duration||oldTime);
-    v.playbackRate=speed;if(wasPlaying)void v.play().catch(()=>setError("تعذر استئناف الفيديو بعد تغيير الجودة."));
-  },{once:true});
- }
- function preview(e:React.PointerEvent<HTMLInputElement>){
-  const v=video.current,track=e.currentTarget;
-  if(!v?.duration||!Number.isFinite(v.duration))return;
-  const bounds=track.getBoundingClientRect();
-  const ratio=Math.max(0,Math.min(1,(e.clientX-bounds.left)/bounds.width));
-  const t=ratio*v.duration;
-  setHover({x:Math.max(65,Math.min(bounds.width-65,e.clientX-bounds.left)),t});
-  if(hoverVideo.current&&Math.abs(hoverVideo.current.currentTime-t)>.3)hoverVideo.current.currentTime=t;
- }
- async function fullscreen(){const el=box.current;if(!el)return;
-  try{if(document.fullscreenElement)await document.exitFullscreen();else await el.requestFullscreen();}
-  catch{setError("وضع ملء الشاشة غير مدعوم في هذا المتصفح.");}
- }
- async function pip(){const v=video.current;if(!v)return;
-  try{if(document.pictureInPictureElement)await document.exitPictureInPicture();else if(document.pictureInPictureEnabled)await v.requestPictureInPicture();}
-  catch{setError("صورة داخل صورة غير متاحة على هذا الجهاز.");}
- }
- return <div className={styles.wrap}>
-  <div className={styles.player} ref={box} onPointerDown={(e)=>{if(menu&&!((e.target as HTMLElement).closest("[data-player-menu]")))setMenu(false);}}>
-   <div className={styles.title}>{title}</div>
-   <video ref={video} className={styles.video} playsInline preload="metadata" poster={poster} src={current?.src}
-    onTimeUpdate={e=>setTime(e.currentTarget.currentTime)} onDurationChange={e=>setDuration(e.currentTarget.duration)}
-    onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)}
-    onError={()=>setError("فشل تحميل الفيديو.")}
-   >{subtitles.map(s=><track key={s.lang} kind="subtitles" srcLang={s.lang} label={s.label} src={s.src}/>)}</video>
-   {!playing&&<button className={styles.playBig} onClick={toggle} aria-label="تشغيل الفيديو">▶</button>}
-   {hover&&<div className={styles.peek} style={{left:`${hover.x}px`}} aria-hidden="true">
-    {previewSrc?<video ref={hoverVideo} muted playsInline preload="metadata" src={previewSrc} />:poster?<img src={poster} alt=""/>:null}
-    <span>{format(hover.t)}</span>
-   </div>}
-   <div className={styles.controls}>
-    <input aria-label="شريط تقدم الفيديو" className={styles.range} type="range" min="0" max={Number.isFinite(duration)?duration:0}
-      step=".1" value={Math.min(time,Number.isFinite(duration)?duration:0)}
-      onPointerMove={preview} onPointerLeave={()=>setHover(null)} onChange={e=>{if(video.current)video.current.currentTime=Number(e.target.value)}}/>
-    <div className={styles.row}>
-     <button onClick={toggle} aria-label={playing?"إيقاف":"تشغيل"}>{playing?"Ⅱ":"▶"}</button>
-     <button onClick={()=>skip(-10)} aria-label="تأخير عشر ثوان">↶10</button>
-     <button onClick={()=>skip(10)} aria-label="تقديم عشر ثوان">10↷</button>
-     <button onClick={()=>{if(video.current){video.current.muted=!video.current.muted;setMuted(video.current.muted);}}} aria-label={muted?"إلغاء الكتم":"كتم"}>{muted?"×♫":"♫"}</button>
-     <time className={styles.time}>{format(time)} / {format(Number.isFinite(duration)?duration:0)}</time>
-     <button className={styles.pill} data-player-menu aria-expanded={menu} onClick={()=>setMenu(!menu)} aria-label="إعدادات التشغيل">⚙</button>
-     <button onClick={pip} aria-label="صورة داخل صورة">▣</button>
-     <button onClick={fullscreen} aria-label="ملء الشاشة">⛶</button>
-    </div>
-   </div>
-   {menu&&<div className={styles.glass} data-player-menu role="dialog" aria-label="إعدادات الفيديو">
-    <header>إعدادات الفيديو <button onClick={()=>setMenu(false)} aria-label="إغلاق">✕</button></header>
-    <div className={styles.setting}><b>السرعة</b><div>{[.5,.75,1,1.25,1.5,1.75,2].map(s=><button key={s} aria-pressed={speed===s} onClick={()=>setSpeed(s)}>{s}x</button>)}</div></div>
-    <div className={styles.setting}><b>الجودة</b><div>{sources.length?sources.map(s=><button key={s.label} aria-pressed={quality===s.label} onClick={()=>changeQuality(s.label)}>{s.label}</button>):<small>لا توجد جودات مرفوعة</small>}</div></div>
-    <div className={styles.setting}><b>الترجمة</b><div><button aria-pressed={captions==="off"} onClick={()=>setCaptions("off")}>إيقاف</button>{subtitles.map(s=><button key={s.lang} aria-pressed={captions===s.lang} onClick={()=>setCaptions(s.lang)}>{s.label}</button>)}</div></div>
-   </div>}
-  </div>
-  {error&&<div className={styles.error} role="alert">{error}</div>}
-  <p className={styles.explain}>تظهر الجودة والترجمة فقط عند توفر ملفاتها. التنزيل خارج المشغل ويتطلب صلاحية كورس وخدمة تنزيل مشفرة ومدعومة.</p>
- </div>
+export type SubtitleSource={lang:string;label:string;src:string};
+type Props={title:string;sources:QualitySource[];subtitles?:SubtitleSource[];poster?:string;previewSrc?:string;onProgress?:(seconds:number)=>void;initialTime?:number};
+const EMPTY_TRACKS:SubtitleSource[]=[];
+const glyphs:Record<string,string>={play:"m9 5 12 8-12 8z",pause:"M8 5v16 M18 5v16",back:"M7 6 2 11l5 5 M3 11h13a7 7 0 1 1-6 10",forward:"m19 6 5 5-5 5 M23 11H10a7 7 0 1 0 6 10",volume:"m3 10 5 0 6-5v16l-6-5H3z M18 8a8 8 0 0 1 0 10",mute:"m3 10 5 0 6-5v16l-6-5H3z M19 10l5 6 M24 10l-5 6",settings:"M4 6h18 M4 13h18 M4 20h18 M9 3v6 M17 10v6 M11 17v6",pip:"M3 4h20v18H3z M13 12h8v8h-8z",full:"M3 10V3h7 M16 3h7v7 M23 16v7h-7 M10 23H3v-7"};
+function Glyph({name}:{name:string}){return <svg aria-hidden="true" width="20" height="20" viewBox="0 0 26 26" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round"><path d={glyphs[name]}/></svg>}
+export default function SmartPlayer({title,sources,subtitles=EMPTY_TRACKS,poster,previewSrc,onProgress,initialTime=0}:Props){
+ const menuId=useId();const restore=useRef<{time:number;play:boolean}|null>(null);
+ const {tr}=usePreferences();const video=useRef<HTMLVideoElement>(null),hoverVideo=useRef<HTMLVideoElement>(null),box=useRef<HTMLDivElement>(null),settings=useRef<HTMLButtonElement>(null);
+ const [quality,setQuality]=useState(sources[0]?.label??"");const current=sources.find(s=>s.label===quality)??sources[0];
+ const [speed,setSpeed]=useState(1),[playing,setPlaying]=useState(false),[time,setTime]=useState(0),[duration,setDuration]=useState(0),[menu,setMenu]=useState(false),[captions,setCaptions]=useState("off"),[muted,setMuted]=useState(false),[error,setError]=useState("");
+ const [visible,setVisible]=useState(true),[skipBy,setSkipBy]=useState(10),[pipSupported,setPipSupported]=useState(false),[fullSupported,setFullSupported]=useState(false),[hover,setHover]=useState<{x:number;t:number}|null>(null);
+ const timer=useRef<ReturnType<typeof setTimeout>|null>(null);const position=useRef(initialTime);const wasPlaying=useRef(false);const initialized=useRef(false);const switchPending=useRef(false);const oldSource=useRef<string|undefined>(undefined);
+ const format=(n:number)=>{n=Number.isFinite(n)&&n>=0?n:0;return `${Math.floor(n/60).toString().padStart(2,"0")}:${Math.floor(n%60).toString().padStart(2,"0")}`};
+ function reveal(){setVisible(true);if(timer.current)clearTimeout(timer.current);timer.current=setTimeout(()=>setVisible(false),2600);}
+ function closeMenu(){setMenu(false);settings.current?.focus();}
+ function applyTracks(){const v=video.current;if(v)Array.from(v.textTracks).forEach(t=>{t.mode=captions!=="off"&&t.language===captions?"showing":"disabled";});}
+ function loaded(){const v=video.current;if(!v)return;setDuration(Number.isFinite(v.duration)?v.duration:0);v.playbackRate=speed;applyTracks();
+  if(!initialized.current||switchPending.current){const target=restore.current??{time:position.current,play:wasPlaying.current};if(Number.isFinite(v.duration))v.currentTime=Math.min(target.time,v.duration);position.current=v.currentTime;setTime(v.currentTime);initialized.current=true;switchPending.current=false;restore.current=null;if(target.play)void v.play().catch(()=>setError(tr("تعذر استئناف الفيديو.","Unable to resume video.")));}}
+ useEffect(()=>{setPipSupported(!!document.pictureInPictureEnabled);setFullSupported(!!document.fullscreenEnabled);return()=>{if(timer.current)clearTimeout(timer.current)};},[]);
+ useEffect(()=>{if(oldSource.current&&oldSource.current!==current?.src){if(!restore.current)restore.current={time:position.current,play:wasPlaying.current};switchPending.current=true;}oldSource.current=current?.src;const v=video.current;if(v&&v.readyState>=1)loaded();},[current?.src]); // Source changes only; refs retain position, not credentials.
+ useEffect(()=>{if(video.current)video.current.playbackRate=speed;},[speed]);
+ useEffect(applyTracks,[captions,subtitles]);
+ useEffect(()=>{const escape=(e:KeyboardEvent)=>{if(e.key==="Escape"&&menu)closeMenu()};document.addEventListener("keydown",escape);return()=>document.removeEventListener("keydown",escape)},[menu]);
+ async function toggle(){const v=video.current;if(!v||!current)return;setError("");try{if(v.paused)await v.play();else v.pause()}catch{setError(tr("تعذر تشغيل الفيديو. تحقق من الملف وصلاحية الوصول.","Unable to play. Check media availability and access."));}}
+ function seek(seconds:number){const v=video.current;if(v&&Number.isFinite(v.duration)){v.currentTime=Math.max(0,Math.min(v.duration,seconds));setTime(v.currentTime);position.current=v.currentTime;onProgress?.(v.currentTime);}}
+ function changeQuality(label:string){if(label===current?.label)return;const v=video.current;if(v){position.current=v.currentTime;wasPlaying.current=!v.paused;restore.current={time:v.currentTime,play:!v.paused};}switchPending.current=true;setQuality(label);setMenu(false);}
+ function preview(e:React.PointerEvent<HTMLInputElement>){const r=e.currentTarget.getBoundingClientRect();if(!duration)return;const t=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width))*duration;setHover({x:Math.max(60,Math.min(r.width-60,e.clientX-r.left)),t});if(hoverVideo.current)hoverVideo.current.currentTime=t;}
+ async function fullscreen(){try{if(document.fullscreenElement)await document.exitFullscreen();else await box.current?.requestFullscreen();}catch{setError(tr("ملء الشاشة غير متاح.","Fullscreen unavailable."));}}
+ async function pip(){try{if(document.pictureInPictureElement)await document.exitPictureInPicture();else await video.current?.requestPictureInPicture();}catch{setError(tr("صورة داخل صورة غير متاحة.","Picture-in-picture unavailable."));}}
+ return <div className={styles.wrap}><div className={styles.player} ref={box} tabIndex={0} role="region" aria-label={title} onPointerMove={reveal} onFocusCapture={reveal} onPointerDown={e=>{if(menu&&!(e.target as HTMLElement).closest("[data-player-menu]"))setMenu(false)}} onKeyDown={e=>{if(e.target!==e.currentTarget)return;if([" ","ArrowLeft","ArrowRight"].includes(e.key))e.preventDefault();if(e.key===" "||e.key.toLowerCase()==="k")void toggle();if(e.key==="ArrowLeft")seek(time-skipBy);if(e.key==="ArrowRight")seek(time+skipBy);if(e.key.toLowerCase()==="f")void fullscreen();reveal();}}>
+ <div className={styles.title}>{title}</div>
+ <video ref={video} className={styles.video} playsInline preload="metadata" poster={poster} src={current?.src} onLoadedMetadata={loaded} onDurationChange={e=>setDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)} onTimeUpdate={e=>{if(switchPending.current)return;position.current=e.currentTarget.currentTime;setTime(position.current);onProgress?.(position.current)}} onPlay={()=>{wasPlaying.current=true;setPlaying(true);reveal()}} onPause={()=>{if(!switchPending.current)wasPlaying.current=false;setPlaying(false)}} onEnded={()=>{wasPlaying.current=false;setPlaying(false);setVisible(true)}} onError={()=>setError(tr("فشل تحميل الفيديو.","Video loading failed."))}>
+ {subtitles.map(s=><track key={s.lang} kind="subtitles" srcLang={s.lang} label={s.label} src={s.src} onLoad={applyTracks}/>)}</video>
+ {!playing&&<button className={styles.playBig} disabled={!current} onClick={toggle} aria-label={tr("تشغيل الفيديو","Play video")}><Glyph name="play"/></button>}
+ {hover&&previewSrc&&<div className={styles.peek} style={{left:hover.x}} aria-hidden="true"><video ref={hoverVideo} muted playsInline preload="metadata" src={previewSrc} onLoadedMetadata={e=>{e.currentTarget.currentTime=hover.t}}/><span>{format(hover.t)}</span></div>}
+ <div className={`${styles.controls} ${playing&&!menu&&!visible?styles.hidden:""}`}><input dir="ltr" aria-label={tr("شريط تقدم الفيديو","Video timeline")} className={styles.range} type="range" min={0} max={duration} step={.1} value={Math.min(time,duration)} disabled={!duration} onPointerMove={preview} onPointerLeave={()=>setHover(null)} onChange={e=>seek(Number(e.target.value))}/>
+ <div className={styles.row}><button disabled={!current} onClick={toggle} aria-label={playing?tr("إيقاف مؤقت","Pause"):tr("تشغيل","Play")}><Glyph name={playing?"pause":"play"}/></button><button onClick={()=>seek(time-skipBy)} aria-label={tr(`تأخير ${skipBy} ثانية`,`Back ${skipBy} seconds`)}><Glyph name="back"/></button><button onClick={()=>seek(time+skipBy)} aria-label={tr(`تقديم ${skipBy} ثانية`,`Forward ${skipBy} seconds`)}><Glyph name="forward"/></button><button onClick={()=>{if(video.current){video.current.muted=!video.current.muted;setMuted(video.current.muted)}}} aria-label={muted?tr("إلغاء الكتم","Unmute"):tr("كتم","Mute")}><Glyph name={muted?"mute":"volume"}/></button><time className={styles.time}>{format(time)} / {format(duration)}</time><button ref={settings} data-player-menu aria-expanded={menu} aria-controls={menuId} onClick={()=>setMenu(!menu)} aria-label={tr("إعدادات التشغيل","Playback settings")}><Glyph name="settings"/></button><button disabled={!pipSupported} onClick={pip} aria-label={tr("صورة داخل صورة","Picture in picture")} title={tr("حسب دعم المتصفح","Requires browser support")}><Glyph name="pip"/></button><button disabled={!fullSupported} onClick={fullscreen} aria-label={tr("ملء الشاشة","Fullscreen")}><Glyph name="full"/></button></div></div>
+ {menu&&<div id={menuId} className={styles.glass} data-player-menu role="dialog" aria-label={tr("إعدادات الفيديو","Video settings")}><header>{tr("إعدادات الفيديو","Video settings")}<button onClick={closeMenu} aria-label={tr("إغلاق","Close")}>×</button></header>
+ <div className={styles.setting}><b>{tr("التقديم والتأخير","Skip interval")}</b><div>{[5,10,15].map(n=><button key={n} aria-pressed={skipBy===n} onClick={()=>setSkipBy(n)}>{n}s</button>)}</div></div>
+ <div className={styles.setting}><b>{tr("السرعة","Speed")}</b><div>{[.5,.75,1,1.25,1.5,1.75,2].map(s=><button key={s} aria-pressed={speed===s} onClick={()=>setSpeed(s)}>{s}x</button>)}</div></div>
+ <div className={styles.setting}><b>{tr("الجودة","Quality")}</b><div>{sources.length?sources.map(s=><button key={s.label} aria-pressed={current?.label===s.label} onClick={()=>changeQuality(s.label)}>{s.label}</button>):<small>{tr("لم يُرفع مصدر فيديو","No video uploaded")}</small>}</div></div>
+ <div className={styles.setting}><b>{tr("الترجمة","Captions")}</b><div><button aria-pressed={captions==="off"} onClick={()=>setCaptions("off")}>{tr("إيقاف","Off")}</button>{subtitles.map(s=><button key={s.lang} aria-pressed={captions===s.lang} onClick={()=>setCaptions(s.lang)}>{s.label}</button>)}</div></div></div>}
+ </div>{error&&<p className={styles.error} role="alert">{error}</p>}{!current&&<p role="status" className={styles.explain}>{tr("المشاهدة غير متاحة حتى التحقق من المصدر والاستحقاق.","Playback requires a verified source and entitlement.")}</p>}</div>;
 }

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 
 export async function login(_prev: { error?: string } | undefined, formData: FormData) {
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return {error:"تسجيل الدخول غير متاح حتى ربط بيئة الاختبار الآمنة."};
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
     email: String(formData.get("email") ?? ""),
@@ -15,6 +16,7 @@ export async function login(_prev: { error?: string } | undefined, formData: For
 export async function signup(_prev: { error?: string } | undefined, formData: FormData) {
   const password = String(formData.get("password") ?? "");
   if (password.length < 8) return { error: "كلمة المرور يجب ألا تقل عن 8 أحرف." };
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return {error:"تسجيل الدخول غير متاح حتى ربط بيئة الاختبار الآمنة."};
   const supabase = await createClient();
   const { error } = await supabase.auth.signUp({
     email: String(formData.get("email") ?? ""),
