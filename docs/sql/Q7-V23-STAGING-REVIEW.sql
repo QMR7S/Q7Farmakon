@@ -39,7 +39,9 @@ begin
  if to_regclass('public.courses') is not null then
   execute 'alter table public.courses add column if not exists free_preview_limit integer not null default 0';
   execute 'alter table public.courses add column if not exists cover_path text';
-  execute 'alter table public.courses add constraint q7_preview_limit_nonnegative check(free_preview_limit between 0 and 1000) not valid';
+  if not exists (select 1 from pg_constraint where conname = 'q7_preview_limit_nonnegative' and conrelid = 'public.courses'::regclass) then
+   execute 'alter table public.courses add constraint q7_preview_limit_nonnegative check(free_preview_limit between 0 and 1000) not valid';
+  end if;
   -- Validate this constraint only after reviewing existing data.
  end if;
 end $$;
