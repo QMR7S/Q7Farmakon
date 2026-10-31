@@ -76,7 +76,7 @@ test("authentication uses original reference flows and real server actions",()=>
  assert.match(auth,/action=\{formAction\}/);
  assert.match(actions,/signInWithPassword/);
  assert.match(actions,/auth\.signUp/);
- assert.match(shell,/if \(path === "\/login" \|\| path === "\/signup"\) return children;/);
+ assert.match(shell,/path === "\/reset-password"/);
  assert.match(css,/\.fk-auth/);
  assert.doesNotMatch(css,/(^|\n)body\s*\{/);
 });
