@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 const paths: Record<string, string> = {
+  pharmacy: "M10.3 3.8a5 5 0 0 1 7.1 7.1l-6.5 6.5a5 5 0 0 1-7.1-7.1zM7.3 7.3l7.1 7.1M18.5 16v6m-3-3h6",
   home: "m3 10 9-7 9 7v10H5V10m4 10v-7h6v7",
   courses: "M4 4h16v16H4zM8 4v16M8 9h12",
   learn: "m9 6 10 6-10 6z",
