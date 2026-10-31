@@ -175,7 +175,7 @@ export default function AuthForm({mode,action,configured}:{
        <div className="alt"><button type="button" className="lnk" onClick={()=>{setReset(false);setClientError("")}}>{T.back}</button></div>
      </form>:<form action={formAction} onSubmit={submit} noValidate>
       <h2>{signup?T.join:T.welcome}</h2><p className="sub">{signup?T.joinDetail:T.welcomeDetail}</p>
-      {signup&&<div className="steps" aria-live="polite"><i className="on"/><i className={step===2?"on":""}/>
+      {result?.success&&<div className="ok" role="status">{result.success} <Link href="/login">{T.login}</Link></div>}\n      {signup&&<div className="steps" aria-live="polite"><i className="on"/><i className={step===2?"on":""}/>
         <span>{L==="ar"?`الخطوة ${step} من 2 · ${step===1?T.stepOne:T.stepTwo}`:`Step ${step} of 2 · ${step===1?T.stepOne:T.stepTwo}`}</span></div>}
       <div className="step" hidden={signup&&step!==1}>
        {signup&&<div className="f"><AuthGlyph name="user"/><input id="auth-full-name" name="full_name" type="text" placeholder=" "
