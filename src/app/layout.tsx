@@ -5,6 +5,7 @@ import { Preferences } from "@/components/platform/Preferences";
 import Shell from "@/components/platform/Shell";
 import "./globals.css";
 import "./platform.css";
+import "./v3.css";
 export const metadata: Metadata = {
   title: {
     default: "Farmakon — مساحتك لتعلّم الصيدلة",
