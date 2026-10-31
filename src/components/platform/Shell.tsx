@@ -50,7 +50,7 @@ export default function Shell({
         <span>{tr(ar, en)}</span>
       </Link>
     ));
-  if (path === "/review") return children;
+  // Approved authentication screen owns its full-page layout; no duplicate Q7 header.\n  if (path === "/login" || path === "/signup") return children;\n  if (path === "/review") return children;
   return (
     <div
       className={`q-app ${collapsed ? "is-collapsed" : ""} ${auth ? "auth-layout" : ""} ${owner ? "owner-layout" : ""}`}
