@@ -58,8 +58,10 @@ export default function Shell({
       {!auth && !owner && (
         <aside className="q-sidebar">
           <Link className="q-brand" href="/">
-            <span className="q-mark" aria-hidden="true"><Icon name="pharmacy" size={25} /></span>
-            <span className="q-brand-label">
+            <span className="q-mark">
+              F<span>•</span>
+            </span>
+            <span>
               Farmakon<small>LEARN. CONNECT. GROW.</small>
             </span>
           </Link>
@@ -72,9 +74,7 @@ export default function Shell({
           <p className="q-nav-label">
             {tr("تعلّم بعمق", "EXPLORE & PRACTICE")}
           </p>
-          <nav aria-label={tr("التدريب والتطبيق", "Practice and apply")}>{nav(destinations.slice(5, 9))}</nav>
-          <p className="q-nav-label">{tr("أدواتي الدراسية", "MY STUDY TOOLS")}</p>
-          <nav aria-label={tr("أدوات الطالب", "Student tools")}>{nav(destinations.slice(9, 14))}</nav>
+          <nav>{nav(destinations.slice(5, 10))}</nav>
           <div className="q-side-end">
             <Link className="q-nav" href="/settings">
               <Icon name="settings" />
@@ -86,10 +86,10 @@ export default function Shell({
             </Link>
             <button
               className="q-nav"
-              onClick={() => setCollapsed(!collapsed)}
               type="button"
               aria-pressed={collapsed}
-              aria-label={collapsed ? tr("توسيع القائمة", "Expand sidebar") : tr("طي القائمة", "Collapse sidebar")}
+              onClick={() => setCollapsed(!collapsed)}
+              aria-label={tr("طي القائمة", "Collapse sidebar")}
             >
               <Icon name="collapse" />
               <span>{tr("طي القائمة", "Collapse sidebar")}</span>
@@ -110,7 +110,9 @@ export default function Shell({
         <header className="q-header">
           {auth || owner ? (
             <Link className="q-brand" href="/">
-              <span className="q-mark" aria-hidden="true"><Icon name="pharmacy" size={25} /></span>
+              <span className="q-mark">
+                F<span>•</span>
+              </span>
               <span>Farmakon</span>
             </Link>
           ) : (
