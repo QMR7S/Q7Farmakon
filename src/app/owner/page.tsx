@@ -22,6 +22,7 @@ async function getAll<T>(fetchPage:(from:number,to:number)=>Promise<{data:T[] | 
 }
 
 export default async function OwnerPage() {
+ if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) return <div className={styles.denied}><h1>بيئة الإدارة غير متصلة</h1><p>لم تُهيّأ قاعدة Staging بعد. الدخول إلى بيانات المالك وعمليات الحفظ غير متاح حتى إكمال الإعداد الأمني.</p><Link href="/owner/login">تسجيل الدخول</Link><br/><Link href="/">العودة للمنصة</Link></div>;
  const access=await getOwnerAccess();
  if(access.state==="signed-out")redirect("/owner/login");
  if(access.state==="forbidden")return <div className={styles.denied} dir="rtl"><h1>الدخول غير مسموح</h1><p>هذه المنطقة لحساب المالك المعتمد عبر Google فقط.</p><Link href="/owner/login">الدخول بحساب Google</Link></div>;
@@ -38,13 +39,13 @@ export default async function OwnerPage() {
    getAll<Enrollment>(async(a,b)=>{const r=await s.from("enrollments").select("user_id,course_id,expires_at,status").range(a,b);return {data:r.data,error:r.error};}),
  ]);
  const now=Date.now();
- const valid=enrollments.rows.filter(e=>(!e.status || e.status==="active") && (e.expires_at===null || Date.parse(e.expires_at)>now));
+ const valid=enrollments.rows.filter(e=>e.status==="active" && (e.expires_at===null || Date.parse(e.expires_at)>now));
  const byUniversity=Object.entries(students.rows.reduce<Record<string,number>>((a,s)=>{const key=s.university?.trim()||"غير محددة";a[key]=(a[key]||0)+1;return a;},{})).sort((a,b)=>b[1]-a[1]);
  const byStage=Object.entries(students.rows.reduce<Record<string,number>>((a,s)=>{const key=s.stage?String(s.stage):"غير محددة";a[key]=(a[key]||0)+1;return a;},{})).sort((a,b)=>Number(a[0])-Number(b[0]));
  const byCourse=courses.rows.map(c=>({name:c.title,students:new Set(valid.filter(e=>e.course_id===c.id).map(e=>e.user_id)).size}));
  return <OwnerConsole
    courses={courses.rows}
-   summary={{courses:courses.complete?courses.rows.length:null,students:students.complete?students.rows.length:null,enrollments:enrollments.complete?valid.length:null,coverage:courses.complete&&students.complete&&enrollments.complete}}
+   summary={{courses:courses.complete?courses.rows.length:null,students:students.complete?students.rows.length:null,enrollments:enrollments.complete?new Set(valid.map(e=>`${e.user_id}:${e.course_id}`)).size:null,coverage:courses.complete&&students.complete&&enrollments.complete}}
    university={students.complete?byUniversity:[]}
    stages={students.complete?byStage:[]}
    byCourse={courses.complete&&enrollments.complete?byCourse:[]}

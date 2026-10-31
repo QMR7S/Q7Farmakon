@@ -22,9 +22,15 @@ export default function SmartPlayer({
  const [muted,setMuted]=useState(false);
  const [hover,setHover]=useState<{x:number;t:number}|null>(null);
  const [error,setError]=useState("");
+ const [controlsVisible,setControlsVisible]=useState(true);
+ const [skipBy,setSkipBy]=useState(10);
+ const hideTimer=useRef<ReturnType<typeof setTimeout>|null>(null);
+ function reveal(){setControlsVisible(true);if(hideTimer.current)clearTimeout(hideTimer.current);hideTimer.current=setTimeout(()=>setControlsVisible(false),2500);}
+ useEffect(()=>()=>{if(hideTimer.current)clearTimeout(hideTimer.current)},[]);
  const current=sources.find(x=>x.label===quality)??sources[0];
  const format=(seconds:number)=>`${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(Math.floor(seconds%60)).padStart(2,"0")}`;
  useEffect(()=>{const v=video.current;if(v)v.playbackRate=speed;},[speed]);
+ useEffect(()=>{const v=video.current;if(v&&v.readyState>=1)setDuration(v.duration);},[current?.src]);
  useEffect(()=>{const v=video.current;if(!v)return;
   const tracks=Array.from(v.textTracks);
   tracks.forEach(track=>{track.mode=captions!=="off"&&track.language===captions?"showing":"disabled";});
@@ -67,35 +73,43 @@ export default function SmartPlayer({
   catch{setError("صورة داخل صورة غير متاحة على هذا الجهاز.");}
  }
  return <div className={styles.wrap}>
-  <div className={styles.player} ref={box} onPointerDown={(e)=>{if(menu&&!((e.target as HTMLElement).closest("[data-player-menu]")))setMenu(false);}}>
+  <div className={styles.player} ref={box} tabIndex={0} role="region" aria-label={title}
+   onPointerMove={reveal} onFocusCapture={reveal}
+   onKeyDown={e=>{if(e.target!==e.currentTarget)return;
+    if(e.key===" "||e.key.toLowerCase()==="k"){e.preventDefault();void toggle();}
+    if(e.key==="ArrowLeft"){e.preventDefault();skip(-skipBy);}
+    if(e.key==="ArrowRight"){e.preventDefault();skip(skipBy);}
+    if(e.key.toLowerCase()==="f")void fullscreen();reveal();}}
+ onPointerDown={(e)=>{if(menu&&!((e.target as HTMLElement).closest("[data-player-menu]")))setMenu(false);}}>
    <div className={styles.title}>{title}</div>
    <video ref={video} className={styles.video} playsInline preload="metadata" poster={poster} src={current?.src}
-    onTimeUpdate={e=>setTime(e.currentTarget.currentTime)} onDurationChange={e=>setDuration(e.currentTarget.duration)}
-    onPlay={()=>setPlaying(true)} onPause={()=>setPlaying(false)}
+    onLoadedMetadata={e=>setDuration(e.currentTarget.duration)} onTimeUpdate={e=>setTime(e.currentTarget.currentTime)} onDurationChange={e=>setDuration(e.currentTarget.duration)}
+    onPlay={()=>{setPlaying(true);reveal();}} onPause={()=>setPlaying(false)}
     onError={()=>setError("فشل تحميل الفيديو.")}
    >{subtitles.map(s=><track key={s.lang} kind="subtitles" srcLang={s.lang} label={s.label} src={s.src}/>)}</video>
    {!playing&&<button className={styles.playBig} onClick={toggle} aria-label="تشغيل الفيديو">▶</button>}
    {hover&&<div className={styles.peek} style={{left:`${hover.x}px`}} aria-hidden="true">
-    {previewSrc?<video ref={hoverVideo} muted playsInline preload="metadata" src={previewSrc} />:poster?<img src={poster} alt=""/>:null}
+    {previewSrc?<video ref={hoverVideo} muted playsInline preload="metadata" src={previewSrc} onLoadedMetadata={e=>{if(hover)e.currentTarget.currentTime=hover.t}} />:poster?<img src={poster} alt=""/>:null}
     <span>{format(hover.t)}</span>
    </div>}
-   <div className={styles.controls}>
+   <div className={`${styles.controls} ${playing&&!menu&&!controlsVisible?styles.hidden:""}`}>
     <input aria-label="شريط تقدم الفيديو" className={styles.range} type="range" min="0" max={Number.isFinite(duration)?duration:0}
       step=".1" value={Math.min(time,Number.isFinite(duration)?duration:0)}
       onPointerMove={preview} onPointerLeave={()=>setHover(null)} onChange={e=>{if(video.current)video.current.currentTime=Number(e.target.value)}}/>
     <div className={styles.row}>
      <button onClick={toggle} aria-label={playing?"إيقاف":"تشغيل"}>{playing?"Ⅱ":"▶"}</button>
-     <button onClick={()=>skip(-10)} aria-label="تأخير عشر ثوان">↶10</button>
-     <button onClick={()=>skip(10)} aria-label="تقديم عشر ثوان">10↷</button>
+     <button onClick={()=>skip(-skipBy)} aria-label={`تأخير ${skipBy} ثانية`}>↶{skipBy}</button>
+     <button onClick={()=>skip(skipBy)} aria-label={`تقديم ${skipBy} ثانية`}>{skipBy}↷</button>
      <button onClick={()=>{if(video.current){video.current.muted=!video.current.muted;setMuted(video.current.muted);}}} aria-label={muted?"إلغاء الكتم":"كتم"}>{muted?"×♫":"♫"}</button>
      <time className={styles.time}>{format(time)} / {format(Number.isFinite(duration)?duration:0)}</time>
      <button className={styles.pill} data-player-menu aria-expanded={menu} onClick={()=>setMenu(!menu)} aria-label="إعدادات التشغيل">⚙</button>
-     <button onClick={pip} aria-label="صورة داخل صورة">▣</button>
+     <button disabled={typeof document!=="undefined"&&!document.pictureInPictureEnabled} title="يتطلب دعماً من المتصفح" onClick={pip} aria-label="صورة داخل صورة">▣</button>
      <button onClick={fullscreen} aria-label="ملء الشاشة">⛶</button>
     </div>
    </div>
    {menu&&<div className={styles.glass} data-player-menu role="dialog" aria-label="إعدادات الفيديو">
     <header>إعدادات الفيديو <button onClick={()=>setMenu(false)} aria-label="إغلاق">✕</button></header>
+    <div className={styles.setting}><b>التقديم والتأخير</b><div>{[5,10,15].map(n=><button key={n} aria-pressed={skipBy===n} onClick={()=>setSkipBy(n)}>{n}s</button>)}</div></div>
     <div className={styles.setting}><b>السرعة</b><div>{[.5,.75,1,1.25,1.5,1.75,2].map(s=><button key={s} aria-pressed={speed===s} onClick={()=>setSpeed(s)}>{s}x</button>)}</div></div>
     <div className={styles.setting}><b>الجودة</b><div>{sources.length?sources.map(s=><button key={s.label} aria-pressed={quality===s.label} onClick={()=>changeQuality(s.label)}>{s.label}</button>):<small>لا توجد جودات مرفوعة</small>}</div></div>
     <div className={styles.setting}><b>الترجمة</b><div><button aria-pressed={captions==="off"} onClick={()=>setCaptions("off")}>إيقاف</button>{subtitles.map(s=><button key={s.lang} aria-pressed={captions===s.lang} onClick={()=>setCaptions(s.lang)}>{s.label}</button>)}</div></div>

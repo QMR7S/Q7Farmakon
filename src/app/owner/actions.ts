@@ -9,7 +9,8 @@ type Response = { ok: boolean; message: string; code?: string };
 function writesAllowed() {
   // Explicitly opt in for an isolated staging environment only.
   return process.env.FARMAKON_OWNER_WRITES_ENABLED === "true" &&
-    process.env.FARMAKON_DEPLOY_ENV === "staging" &&\n    process.env.VERCEL_ENV !== "production";
+    process.env.FARMAKON_DEPLOY_ENV === "staging" &&
+    process.env.VERCEL_ENV !== "production";
 }
 const fail = (message: string): Response => ({ ok: false, message });
 

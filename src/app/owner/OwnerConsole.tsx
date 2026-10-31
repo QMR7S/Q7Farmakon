@@ -6,7 +6,7 @@ import styles from "./owner.module.css";
 type Course={id:string;title:string;slug:string;status:string;free_preview_limit:number|null;price_iqd:number|null;cover_path:string|null};
 type Stats={courses:number|null;students:number|null;enrollments:number|null;coverage:boolean};
 type Group=[string,number];
-const defaultState={ok:false,message:""};
+const defaultState:{ok:boolean;message:string;code?:string}={ok:false,message:""};
 const menu=[
  ["overview","نظرة عامة","▤"],["courses","الكورسات والمحتوى","▣"],["videos","الفيديوهات والجودة","▷"],
  ["access","أكواد التفعيل","⌗"],["analytics","الطلاب والجامعات","◫"],["settings","الأمان والإعدادات","⚙"]
@@ -30,7 +30,7 @@ export default function OwnerConsole({courses,summary,university,stages,byCourse
     <div><span className={styles.eyebrow}>Farmakon · إدارة المحتوى والاشتراكات</span><h1>{menu.find(x=>x[0]===section)?.[1]}</h1></div>
     <div className={styles.topRight}><span className={styles.status}>{writesEnabled?"وضع Staging":"الكتابة معلقة للحماية"}</span><button className={styles.outline} onClick={()=>setTheme(theme==="light"?"dark":"light")}>{theme==="light"?"☾ داكن":"☼ فاتح"}</button></div>
    </header>
-   <div className={styles.content}>
+   <main className={styles.content}>
     {!summary.coverage&&<div className={styles.warning} role="status">بعض الجداول أو صلاحيات القراءة لم تجهز بعد. لا تُعرض أرقام تخمينية؛ علامة «—» تعني بيانات غير متوفرة.</div>}
     {section==="overview"&&<>
      <section className={styles.hero}><div><span>COMMAND CENTER</span><h2>لوحة المالك — تحكم شامل ومنظّم</h2><p>الكورسات، المعاينات المجانية، أكواد التفعيل، الاشتراكات ومتابعة الطلبة. البيانات الحقيقية تظهر عند تهيئة Staging.</p></div><button onClick={()=>setSection("courses")}>+ إنشاء كورس جديد</button></section>
