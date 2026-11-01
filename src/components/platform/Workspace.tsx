@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { usePreferences } from "./Preferences";
 import Icon from "./Icon";
+import GlassSelect from "./GlassSelect";
 import { destinations, type CourseCard } from "@/lib/platform/navigation";
 import { CourseCards, Empty } from "./StudentHome";
 export default function Workspace({
@@ -19,8 +20,15 @@ export default function Workspace({
   const { tr, locale, setLocale, theme, setTheme } = usePreferences();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("Materials");
+  const [caseLevel, setCaseLevel] = useState("all");
+  const [sortOrder, setSortOrder] = useState("recent");
   const [tool, setTool] = useState("شرح");
   const [mode, setMode] = useState("simple");
+  const filteredCourses = courses
+    .filter(c => c.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()))
+    .sort((a,b) => sortOrder === "name" ? a.title.localeCompare(b.title)
+       : sortOrder === "price" ? (a.price_iqd ?? Number.MAX_SAFE_INTEGER) - (b.price_iqd ?? Number.MAX_SAFE_INTEGER)
+       : 0);
   const title = destinations.find((x) => x[0] === `/${section}`);
   const titles: Record<string, [string, string]> = {
     search: ["البحث الشامل", "Search everything"],
@@ -104,15 +112,20 @@ export default function Workspace({
                 placeholder={tr("اسم الكورس…", "Course name…")}
               />
             </label>
-          </div>
-          {courses.filter((c) =>
-            c.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
-          ).length ? (
-            <CourseCards
-              courses={courses.filter((c) =>
-                c.title.toLocaleLowerCase().includes(query.toLocaleLowerCase()),
-              )}
+            <GlassSelect
+              className="q-glass-utility"
+              label={tr("ترتيب الكورسات", "Sort courses")}
+              value={sortOrder}
+              onChange={setSortOrder}
+              options={[
+                {value:"recent",label:tr("الترتيب الافتراضي","Default order"),icon:"courses"},
+                {value:"name",label:tr("اسم الكورس","Course name"),icon:"library"},
+                {value:"price",label:tr("السعر: الأقل أولاً","Price: low to high"),icon:"sliders"}
+              ]}
             />
+          </div>
+          {filteredCourses.length ? (
+            <CourseCards courses={filteredCourses} />
           ) : (
             empty(
               "courses",
@@ -155,21 +168,20 @@ export default function Workspace({
       )}
       {section === "library" && (
         <>
-          <div
-            className="q-tabbar"
-            role="group"
-            aria-label={tr("أقسام المكتبة", "Library sections")}
-          >
-            {["Materials", "Sources", "Questions", "Cases"].map((c) => (
-              <button
-                key={c}
-                onClick={() => setCategory(c)}
-                aria-pressed={category === c}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
+          <GlassSelect
+            className="q-glass-utility"
+            label={tr("قسم المكتبة", "Library category")}
+            value={category}
+            onChange={setCategory}
+            searchable
+            searchPlaceholder={tr("ابحث عن قسم…", "Find a section…")}
+            options={[
+              {value:"Materials",label:tr("الملفات الدراسية","Study materials"),icon:"learn"},
+              {value:"Sources",label:tr("المراجع","References"),icon:"library"},
+              {value:"Questions",label:tr("الأسئلة","Questions"),icon:"questions"},
+              {value:"Cases",label:tr("الحالات السريرية","Clinical cases"),icon:"cases"}
+            ]}
+          />
           <div className="q-filterbar">
             <label className="q-field" style={{ flex: 1 }}>
               {tr("بحث في المكتبة", "Search library")}
@@ -261,26 +273,18 @@ export default function Workspace({
       )}
       {section === "cases" && (
         <>
-          <div
-            className="q-tabbar"
-            role="group"
-            aria-label={tr("مستوى الحالة", "Case level")}
-          >
-            {[
-              ["Materials", "الكل", "All"],
-              ["beginner", "مبتدئ", "Beginner"],
-              ["intermediate", "متوسط", "Intermediate"],
-              ["advanced", "متقدم", "Advanced"],
-            ].map(([id, ar, en]) => (
-              <button
-                key={id}
-                onClick={() => setCategory(id)}
-                aria-pressed={category === id}
-              >
-                {tr(ar, en)}
-              </button>
-            ))}
-          </div>
+          <GlassSelect
+            className="q-glass-utility"
+            label={tr("مستوى الحالة", "Case level")}
+            value={caseLevel}
+            onChange={setCaseLevel}
+            options={[
+              {value:"all",label:tr("كل المستويات","All levels"),icon:"grid"},
+              {value:"beginner",label:tr("مبتدئ","Beginner"),icon:"graduation"},
+              {value:"intermediate",label:tr("متوسط","Intermediate"),icon:"learn"},
+              {value:"advanced",label:tr("متقدم","Advanced"),icon:"cases"}
+            ]}
+          />
           <div className="q-panel q-padded">
             <div className="q-row q-row-wrap">
               {[
@@ -337,21 +341,12 @@ export default function Workspace({
                 ))}
               </div>
               <div className="q-form">
-                <label className="q-field">
-                  {tr("أسلوب الشرح", "Explanation style")}
-                  <select
-                    value={mode}
-                    onChange={(e) => setMode(e.target.value)}
-                  >
-                    <option value="simple">{tr("مبسط", "Simple")}</option>
-                    <option value="academic">
-                      {tr("أكاديمي", "Academic")}
-                    </option>
-                    <option value="iraqi">
-                      {tr("بالعراقي", "Iraqi Arabic")}
-                    </option>
-                  </select>
-                </label>
+                <GlassSelect label={tr("أسلوب الشرح", "Explanation style")} value={mode}
+                  onChange={setMode} options={[
+                    {value:"simple",label:tr("مبسط","Simple"),icon:"learn"},
+                    {value:"academic",label:tr("أكاديمي","Academic"),icon:"graduation"},
+                    {value:"iraqi",label:tr("بالعراقي","Iraqi Arabic"),icon:"notes"}
+                  ]}/>
                 <label className="q-field">
                   {tr("سؤالك", "Your question")}
                   <textarea
@@ -397,26 +392,15 @@ export default function Workspace({
           <section className="q-panel q-padded">
             <h2>{tr("تفضيلات العرض", "Display preferences")}</h2>
             <div className="q-form">
-              <label className="q-field">
-                {tr("اللغة", "Language")}
-                <select
-                  value={locale}
-                  onChange={(e) => setLocale(e.target.value as "ar" | "en")}
-                >
-                  <option value="ar">العربية</option>
-                  <option value="en">English</option>
-                </select>
-              </label>
-              <label className="q-field">
-                {tr("المظهر", "Appearance")}
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value as "light" | "dark")}
-                >
-                  <option value="light">{tr("فاتح", "Light")}</option>
-                  <option value="dark">{tr("داكن", "Dark")}</option>
-                </select>
-              </label>
+              <GlassSelect label={tr("اللغة", "Language")} value={locale}
+                onChange={(v)=>setLocale(v as "ar"|"en")}
+                options={[{value:"ar",label:"العربية",icon:"globe"},{value:"en",label:"English",icon:"globe"}]}/>
+              <GlassSelect label={tr("المظهر", "Appearance")} value={theme}
+                onChange={(v)=>setTheme(v as "light"|"dark")}
+                options={[
+                  {value:"light",label:tr("فاتح","Light"),icon:"sun"},
+                  {value:"dark",label:tr("داكن","Dark"),icon:"moon"}
+                ]}/>
               <p className="q-muted">
                 {tr(
                   "تُحفظ تفضيلات العرض على هذا المتصفح. تُحترم تفضيلات تقليل الحركة في جهازك.",
