@@ -6,6 +6,7 @@ import Shell from "@/components/platform/Shell";
 import "./globals.css";
 import "./platform.css";
 import "./internal-identity.css";
+import "./glass-motion.css";
 import "./auth-reference.css";
 export const metadata: Metadata = {
   title: {
