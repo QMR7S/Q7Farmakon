@@ -34,7 +34,7 @@ export function Preferences({ children }: { children: React.ReactNode }) {
           : "ar",
       );
       setTheme(
-        (q.get("reviewTheme") ?? localStorage.getItem("q7:theme")) === "dark"
+        (q.get("reviewTheme") ?? localStorage.getItem("q7:theme") ?? (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")) === "dark"
           ? "dark"
           : "light",
       );

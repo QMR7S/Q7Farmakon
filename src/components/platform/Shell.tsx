@@ -31,7 +31,8 @@ export default function Shell({
   const auth =
     path === "/login" || path === "/signup" || path === "/owner/login";
   const owner = path === "/owner" || path === "/owner-review";
-  const active = destinations.find((d) => d[0] === path);
+  const selectedPath = path.startsWith("/lessons/") ? "/learn" : path.startsWith("/courses/") ? "/my-courses" : path;
+  const active = destinations.find((d) => d[0] === selectedPath);
   const label = active
     ? active[locale === "ar" ? 1 : 2]
     : tr("Farmakon", "Farmakon");
@@ -40,14 +41,17 @@ export default function Shell({
       <Link
         key={href}
         href={href}
-        className={"q-nav " + (path === href ? "selected" : "")}
-        aria-current={path === href ? "page" : undefined}
+        className={"q-nav " + (selectedPath === href ? "selected" : "")}
+        aria-current={selectedPath === href ? "page" : undefined}
+        aria-label={tr(ar, en)}
         title={tr(ar, en)}
       >
         <Icon name={icon} />
         <span>{tr(ar, en)}</span>
       </Link>
     ));
+  // Approved authentication screen owns its full-page layout; no duplicate Q7 header.
+  if (path === "/login" || path === "/signup" || path === "/reset-password") return children;
   if (path === "/review") return children;
   return (
     <div
@@ -72,7 +76,13 @@ export default function Shell({
           <p className="q-nav-label">
             {tr("تعلّم بعمق", "EXPLORE & PRACTICE")}
           </p>
-          <nav>{nav(destinations.slice(5, 10))}</nav>
+          <nav aria-label={tr("التدريب والتطبيق", "Practice and application")}>
+            {nav(destinations.slice(5, 9))}
+          </nav>
+          <p className="q-nav-label">{tr("أدواتي الدراسية", "MY STUDY TOOLS")}</p>
+          <nav aria-label={tr("الأدوات الدراسية", "Study tools")}>
+            {nav(destinations.slice(9, 14))}
+          </nav>
           <div className="q-side-end">
             <Link className="q-nav" href="/settings">
               <Icon name="settings" />
@@ -84,8 +94,10 @@ export default function Shell({
             </Link>
             <button
               className="q-nav"
+              type="button"
+              aria-pressed={collapsed}
               onClick={() => setCollapsed(!collapsed)}
-              aria-label={tr("طي القائمة", "Collapse sidebar")}
+              aria-label={collapsed ? tr("توسيع القائمة", "Expand sidebar") : tr("طي القائمة", "Collapse sidebar")}
             >
               <Icon name="collapse" />
               <span>{tr("طي القائمة", "Collapse sidebar")}</span>

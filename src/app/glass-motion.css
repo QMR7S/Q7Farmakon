@@ -1,0 +1,141 @@
+/* Farmakon Q7 V3: restrained glass surfaces, iOS-like spatial motion.
+   Scoped to the internal student workspace only. Auth reference stays immutable. */
+.q-app:not(.auth-layout) {
+  --q-glass: color-mix(in srgb, var(--q-surface) 86%, transparent);
+  --q-glass-strong: color-mix(in srgb, var(--q-surface) 94%, transparent);
+  --q-ring: color-mix(in srgb, var(--q-primary) 22%, transparent);
+  --q-glass-stroke: color-mix(in srgb, var(--q-line) 66%, rgba(255,255,255,.46));
+  --q-ease-out: cubic-bezier(.22,1,.36,1);
+  --q-ease-spring: cubic-bezier(.2,.85,.2,1.16);
+  isolation: isolate;
+}
+.q-app:not(.auth-layout) .q-sidebar,
+.q-app:not(.auth-layout) .q-header,
+.q-app:not(.auth-layout) .q-dock {transition:width .38s var(--q-ease-out),background-color .25s ease,color .25s ease}
+.q-app:not(.auth-layout) .q-sidebar {overscroll-behavior:contain}
+.q-app:not(.auth-layout) .q-brand-label {min-width:0;transition:opacity .22s ease, transform .32s var(--q-ease-out)}
+.q-app:not(.auth-layout).is-collapsed .q-brand-label,
+.q-app:not(.auth-layout).is-collapsed .q-nav-label,
+.q-app:not(.auth-layout).is-collapsed .q-sidebar .q-nav>span,
+.q-app:not(.auth-layout).is-collapsed .q-side-note {display:none}
+.q-app:not(.auth-layout).is-collapsed .q-brand {justify-content:center}
+.q-app:not(.auth-layout).is-collapsed .q-nav{justify-content:center;padding-inline:8px}
+.q-app:not(.auth-layout).is-collapsed .q-side-end {margin-top:auto}
+.q-app:not(.auth-layout) .q-nav {transition:transform .22s var(--q-ease-out), background .22s ease,color .22s ease}
+.q-app:not(.auth-layout) .q-sidebar .q-nav:hover {transform:translateY(-1px)}
+.q-app:not(.auth-layout) .q-nav:active,
+.q-app:not(.auth-layout) .q-icon-button:active,
+.q-app:not(.auth-layout) .q-btn:active {transform:scale(.975)}
+.q-app:not(.auth-layout) .q-content > :first-child {animation:q7-enter .43s var(--q-ease-out) both}
+.q-app:not(.auth-layout) .q-content .q-panel,
+.q-app:not(.auth-layout) .q-content .q-feature-card,
+.q-app:not(.auth-layout) .q-content .q-screen-link{
+  transition:transform .28s var(--q-ease-out),box-shadow .28s ease,border-color .25s ease;
+}
+.q-app:not(.auth-layout) .q-content .q-panel:hover {border-color:color-mix(in srgb,var(--q-primary) 42%,var(--q-line))}
+.q-app:not(.auth-layout) .q-section-title a {transition:transform .2s var(--q-ease-out),color .2s ease}
+.q-app:not(.auth-layout) .q-section-title a:hover {transform:translateX(-2px)}
+.q-app:not(.auth-layout) .q-notice,
+.q-app:not(.auth-layout) .q-environment{
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+}
+.q-app:not(.auth-layout) .q-glass-select {position:relative;min-width:0;display:grid;gap:8px;align-content:start;font:inherit}
+.q-app:not(.auth-layout) .q-glass-label {font-weight:750;font-size:13px;color:var(--q-ink)}
+.q-app:not(.auth-layout) .q-glass-trigger {
+  min-height:50px;width:100%;border-radius:14px;padding:10px 14px;
+  border:1px solid var(--q-line);background:var(--q-glass);
+  color:var(--q-ink);display:flex;align-items:center;justify-content:space-between;
+  gap:14px;cursor:pointer;box-shadow:0 3px 13px rgba(6,10,34,.035);
+  transition:border-color .2s ease,box-shadow .2s ease,transform .22s var(--q-ease-out);
+}
+.q-app:not(.auth-layout) .q-glass-trigger:hover,
+.q-app:not(.auth-layout) .q-glass-select[data-open=true] .q-glass-trigger {
+  border-color:var(--q-primary);box-shadow:0 0 0 3px var(--q-ring);
+}
+.q-app:not(.auth-layout) .q-glass-trigger-value {display:flex;gap:9px;align-items:center;min-width:0;text-align:start;font-weight:680;font-size:13px}
+.q-app:not(.auth-layout) .q-glass-trigger-value span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.q-app:not(.auth-layout) .q-glass-trigger>svg:last-child {flex-shrink:0;color:var(--q-primary);transition:transform .28s var(--q-ease-out)}
+.q-app:not(.auth-layout) .q-glass-select[data-open=true] .q-glass-trigger>svg:last-child{transform:rotate(180deg)}
+.q-app:not(.auth-layout) .q-glass-backdrop {display:none}
+.q-app:not(.auth-layout) .q-glass-popover {
+  position:absolute;z-index:95;top:calc(100% + 8px);inset-inline:0;
+  min-width:min(340px,calc(100vw - 34px));max-height:min(420px,65vh);
+  border-radius:20px;padding:11px;background:var(--q-glass-strong);
+  border:1px solid var(--q-glass-stroke);
+  box-shadow:0 22px 65px rgba(6,10,34,.19),inset 0 1px 0 rgba(255,255,255,.13);
+  backdrop-filter:blur(28px) saturate(160%);-webkit-backdrop-filter:blur(28px) saturate(160%);
+  display:flex;flex-direction:column;gap:8px;overflow:hidden;
+  animation:q7-pop .27s var(--q-ease-out) both;
+  transform-origin:top center;
+}
+.q-app:not(.auth-layout) .q-glass-popover-title {font-size:12px;font-weight:800;color:var(--q-muted);margin:3px 8px}
+.q-app:not(.auth-layout) .q-glass-handle{display:none}
+.q-app:not(.auth-layout) .q-glass-search{
+  display:flex;align-items:center;gap:9px;border:1px solid var(--q-line);
+  background:var(--q-glass);border-radius:12px;padding:7px 12px;color:var(--q-muted)
+}
+.q-app:not(.auth-layout) .q-glass-search:focus-within{border-color:var(--q-primary);box-shadow:0 0 0 2px var(--q-ring)}
+.q-app:not(.auth-layout) .q-glass-search input{
+  background:none;border:0;outline:0;color:var(--q-ink);flex:1;min-height:32px;min-width:0;font-size:13px
+}
+.q-app:not(.auth-layout) .q-glass-options {overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;padding:3px;display:grid;gap:3px}
+.q-app:not(.auth-layout) .q-glass-option {
+  border:0;background:transparent;color:var(--q-ink);min-height:48px;
+  text-align:start;display:flex;align-items:center;gap:12px;width:100%;
+  padding:9px 11px;border-radius:12px;cursor:pointer;
+  transition:background .18s ease,transform .18s var(--q-ease-out);
+}
+.q-app:not(.auth-layout) .q-glass-option:hover,
+.q-app:not(.auth-layout) .q-glass-option[data-active=true] {background:var(--q-tint)}
+.q-app:not(.auth-layout) .q-glass-option:active{transform:scale(.987)}
+.q-app:not(.auth-layout) .q-glass-option[aria-selected=true] {color:var(--q-primary);font-weight:800}
+.q-app:not(.auth-layout) .q-glass-option:disabled {opacity:.4;cursor:not-allowed}
+.q-app:not(.auth-layout) .q-glass-option-copy{flex:1;display:grid;gap:2px;min-width:0}
+.q-app:not(.auth-layout) .q-glass-option-copy strong{font-size:13px;font-weight:740}
+.q-app:not(.auth-layout) .q-glass-option-copy small{font-size:11px;line-height:1.5;color:var(--q-muted)}
+.q-app:not(.auth-layout) .q-glass-option-icon {
+  width:35px;height:35px;border-radius:10px;display:grid;place-items:center;
+  background:var(--q-tint);color:var(--q-primary);flex-shrink:0;
+}
+.q-app:not(.auth-layout) .q-glass-no-results {padding:22px 14px;text-align:center;font-size:12px;color:var(--q-muted)}
+.q-app:not(.auth-layout) .q-filterbar{align-items:end;gap:12px}
+.q-app:not(.auth-layout) .q-glass-utility{width:min(230px,100%);min-width:0}
+.q-app:not(.auth-layout) .q-command-popover {width:min(330px,calc(100vw - 32px))}
+.q-app:not(.auth-layout) .q-command-popover .q-glass-option-icon {background:transparent}
+.q-app:not(.auth-layout) .q-glass-menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.q-app:not(.auth-layout) .q-glass-menu-actions a {
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  min-height:44px;border-radius:12px;border:1px solid var(--q-line);
+  background:var(--q-glass);font-weight:700;font-size:12px;color:var(--q-ink);
+}
+.q-app:not(.auth-layout) .q-glass-menu-actions a:hover{border-color:var(--q-primary);color:var(--q-primary)}
+@keyframes q7-enter {from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@keyframes q7-pop {from{opacity:0;transform:translateY(-7px) scale(.975)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes q7-sheet {from{opacity:.85;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:700px){
+ .q-app:not(.auth-layout) .q-glass-utility{width:100%}
+ .q-app:not(.auth-layout) .q-filterbar {align-items:stretch}
+ .q-app:not(.auth-layout) .q-glass-backdrop {
+   position:fixed;display:block;inset:0;z-index:98;border:0;
+   background:rgba(3,7,24,.57);backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px)
+ }
+ .q-app:not(.auth-layout) .q-glass-popover{
+   position:fixed;top:auto;inset-inline:0;bottom:0;min-width:0;
+   max-height:min(76dvh,660px);padding:13px 15px calc(20px + env(safe-area-inset-bottom));
+   border-radius:25px 25px 0 0;z-index:99;
+   animation:q7-sheet .34s var(--q-ease-out) both;
+   box-shadow:0 -12px 65px rgba(0,0,0,.24);transform-origin:bottom;
+ }
+ .q-app:not(.auth-layout) .q-glass-handle {display:block;width:43px;height:4px;margin:0 auto 3px;border-radius:999px;background:var(--q-line)}
+ .q-app:not(.auth-layout) .q-glass-option {min-height:53px}
+ .q-app:not(.auth-layout) .q-dock {
+   background:var(--q-glass-strong);backdrop-filter:blur(24px) saturate(160%);
+   -webkit-backdrop-filter:blur(24px) saturate(160%);border-color:var(--q-glass-stroke);
+ }
+ .q-app:not(.auth-layout) .q-dock .q-nav:active{transform:scale(.93)}
+}
+@media(prefers-reduced-motion:reduce) {
+ .q-app:not(.auth-layout) *, .q-app:not(.auth-layout) *::before, .q-app:not(.auth-layout) *::after {
+  transition:none!important;animation:none!important;scroll-behavior:auto!important
+ }
+}
