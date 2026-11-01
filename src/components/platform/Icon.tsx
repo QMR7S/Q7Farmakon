@@ -1,5 +1,9 @@
 import type { CSSProperties } from "react";
 const paths: Record<string, string> = {
+  "chevron-down": "m6 9 6 6 6-6",
+  "sparkles": "m12 3 1.8 6.2L20 11l-6.2 1.8L12 19l-1.8-6.2L4 11l6.2-1.8L12 3zM19 18l.8 1.8L22 20l-2.2.2L19 22l-.8-1.8L16 20l2.2-.2L19 18z",
+  "sliders": "M4 7h16M4 17h16M9 4v6M16 14v6",
+  "graduation": "m2 9 10-5 10 5-10 5L2 9zm4 3v5c3 3 9 3 12 0v-5M22 9v8",
   home: "m3 10 9-7 9 7v10H5V10m4 10v-7h6v7",
   courses: "M4 4h16v16H4zM8 4v16M8 9h12",
   learn: "m9 6 10 6-10 6z",
