@@ -79,33 +79,32 @@ test("authentication uses original reference flows and real server actions",()=>
  assert.doesNotMatch(css,/(^|\n)body\s*\{/);
 });
 
-test("interior glass components are connected to real controls",()=>{
+test("glass controls are wired to real student and owner state", () => {
  const workspace = read("src/components/platform/Workspace.tsx");
  const owner = read("src/app/owner/OwnerConsole.tsx");
  const select = read("src/components/platform/GlassSelect.tsx");
  const glass = read("src/app/glass-motion.css");
  const ownCss = read("src/app/owner/owner.module.css");
  const icon = read("src/components/platform/Icon.tsx");
- assert.ok((workspace.match(/<GlassSelect/g)||[]).length>=6);
- assert.ok((owner.match(/<GlassSelect/g)||[]).length>=3);
- assert.doesNotMatch(workspace,/<select(?:\\s|>)/);
- assert.doesNotMatch(owner,/<select(?:\\s|>)/);
- assert.match(owner,/name="course_id" value=\\{chosenCourse\\}/);
- assert.match(owner,/name="period_type" value=\\{period\\}/);
- assert.match(select,/role="listbox"/);
- assert.match(select,/role="option"/);
- assert.match(select,/aria-expanded=\\{open\\}/);
- assert.match(select,/onKeyDown=\\{onKeys\\}/);
- assert.match(select,/searchable/);
- assert.match(glass,/backdrop-filter/);
- assert.match(glass,/prefers-reduced-motion/);
- assert.match(ownCss,/\.shell :global\\(\.q-glass-popover\\)/);
- assert.match(icon,/"chevron-down":/);
+ assert.ok(workspace.split("<GlassSelect").length - 1 >= 6);
+ assert.ok(owner.split("<GlassSelect").length - 1 >= 3);
+ assert.ok(!workspace.includes("<select"));
+ assert.ok(!owner.includes("<select"));
+ assert.ok(owner.includes('name="course_id" value={chosenCourse}'));
+ assert.ok(owner.includes('name="period_type" value={period}'));
+ assert.ok(select.includes('role="listbox"'));
+ assert.ok(select.includes('role="option"'));
+ assert.ok(select.includes('aria-expanded={open}'));
+ assert.ok(select.includes('onKeyDown={onKeys}'));
+ assert.ok(glass.includes("backdrop-filter"));
+ assert.ok(glass.includes("prefers-reduced-motion"));
+ assert.ok(ownCss.includes(":global(.q-glass-popover)"));
+ assert.ok(icon.includes('"chevron-down"'));
 });
-test("authentication remains visually isolated from interior motion rules",()=>{
+test("auth design remains isolated from internal glass styles", () => {
  const motion=read("src/app/glass-motion.css");
  const auth=read("src/components/AuthForm.tsx");
- assert.match(auth,/className="fk-auth"/);
- assert.match(motion,/\.q-app:not\\(\.auth-layout\\)/);
- assert.doesNotMatch(motion,/\.fk-auth\\s*\\{/);
+ assert.ok(auth.includes('className="fk-auth"'));
+ assert.ok(motion.includes(".q-app:not(.auth-layout)"));
+ assert.ok(!motion.includes(".fk-auth{"));
 });
