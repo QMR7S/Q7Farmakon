@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createOwnerCourse, issueActivationCode } from "./actions";
 import { usePreferences } from "@/components/platform/Preferences";
 import Icon from "@/components/platform/Icon";
+import GlassSelect from "@/components/platform/GlassSelect";
 import styles from "./owner.module.css";
 type Course = {
   id: string;
@@ -52,6 +53,7 @@ export default function OwnerConsole({
   const { tr, theme } = usePreferences();
   const [section, setSection] = useState<string>("overview");
   const [period, setPeriod] = useState("annual");
+  const [chosenCourse, setChosenCourse] = useState("");
   const [courseState, courseAction, coursePending] = useActionState(
     createOwnerCourse,
     { ok: false, message: "" },
@@ -66,16 +68,14 @@ export default function OwnerConsole({
   const enabled = writesEnabled && !review;
   return (
     <div
-      className={styles.shell}
+      className={`${styles.shell} q7-owner-shell`}
       data-theme={theme}
       data-farmakon-owner
       dir={tr("rtl", "ltr")}
     >
       <aside className={styles.side}>
         <div className={styles.logo}>
-          <span className={styles.mark}>
-            F<span>•</span>
-          </span>
+          <span className={styles.mark} aria-hidden="true" />
           <div>
             <strong>Farmakon</strong>
             <small>Q7 / OWNER STUDIO</small>
@@ -131,19 +131,17 @@ export default function OwnerConsole({
             </div>
           )}
           <div className={styles.sectionSelect}>
-            <label>
-              {tr("القسم", "Section")}
-              <select
-                value={section}
-                onChange={(e) => setSection(e.target.value)}
-              >
-                {menu.map(([id, ar, en]) => (
-                  <option key={id} value={id}>
-                    {tr(ar, en)}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <GlassSelect
+              className="q-glass-utility"
+              label={tr("قسم لوحة التحكم", "Management section")}
+              value={section}
+              onChange={setSection}
+              searchable
+              searchPlaceholder={tr("ابحث عن قسم…","Find a section…")}
+              options={menu.map(([id, ar, en, icon])=>({
+                value:id,label:tr(ar,en),icon
+              }))}
+            />
           </div>
           {section === "overview" && (
             <>
@@ -355,37 +353,20 @@ export default function OwnerConsole({
               <section className={styles.panel}>
                 <h3>{tr("إنشاء كود تفعيل", "Issue an access code")}</h3>
                 <form action={codeAction} className={styles.form}>
-                  <label>
-                    {tr("الكورس", "Course")}
-                    <select name="course_id" required defaultValue="">
-                      <option value="" disabled>
-                        {tr("اختر كورساً", "Choose a course")}
-                      </option>
-                      {courses.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.title}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <label>
-                    {tr("مدة الاشتراك", "Access period")}
-                    <select
-                      name="period_type"
-                      value={period}
-                      onChange={(e) => setPeriod(e.target.value)}
-                    >
-                      <option value="annual">
-                        {tr("سنوي — 365 يوماً", "Annual — 365 days")}
-                      </option>
-                      <option value="lifetime">
-                        {tr("مدى الحياة", "Lifetime")}
-                      </option>
-                      <option value="custom">
-                        {tr("أيام مخصصة", "Custom days")}
-                      </option>
-                    </select>
-                  </label>
+                  <GlassSelect label={tr("الكورس", "Course")} value={chosenCourse}
+                    onChange={setChosenCourse}
+                    placeholder={tr("اختر كورساً","Choose a course")}
+                    searchable
+                    searchPlaceholder={tr("ابحث عن كورس…","Search course…")}
+                    options={courses.map(c=>({value:c.id,label:c.title,icon:"courses"}))}/>
+                  <input type="hidden" name="course_id" value={chosenCourse} required/>
+                  <GlassSelect label={tr("مدة الاشتراك", "Access period")} value={period}
+                    onChange={setPeriod} options={[
+                      {value:"annual",label:tr("سنوي — 365 يوماً","Annual — 365 days"),icon:"clock"},
+                      {value:"lifetime",label:tr("مدى الحياة","Lifetime"),icon:"shield"},
+                      {value:"custom",label:tr("أيام مخصصة","Custom days"),icon:"settings"}
+                    ]}/>
+                  <input type="hidden" name="period_type" value={period}/>
                   {period === "custom" && (
                     <label>
                       {tr("عدد الأيام", "Number of days")}
